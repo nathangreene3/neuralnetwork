@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 )
 
 // A species is identified (labeled) by a number
@@ -79,6 +80,7 @@ func getFlowers(filename string) (flowers, error) {
 func shuffle(f flowers) flowers {
 	sf := make(flowers, len(f))
 	copy(sf, f)
+	rand.Seed(int64(time.Now().Second()))
 	rand.Shuffle(sf.Len(), sf.Swap)
 	return sf
 }

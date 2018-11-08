@@ -27,24 +27,26 @@ func main() {
 	// 	}
 	// }
 
-	fmt.Printf(
-		"%0.2f\n",
-		run(
-			data,
-			class,
-			func(x []float64, y float64) float64 {
-				if y == 1 {
-					return 1
-				}
-				return 0
-			},
-		),
-	)
+	for i := 0; i < 3; i++ {
+		fmt.Printf(
+			"%0.2f\n",
+			run(
+				data,
+				class,
+				func(x []float64, y float64) float64 {
+					if int(y) == i+1 {
+						return 1
+					}
+					return 0
+				},
+			),
+		)
+	}
 }
 
 func run(data [][]float64, class []float64, trainer func([]float64, float64) float64) float64 {
-	count := int(0.8 * float64(len(data)))
+	count := int(0.75 * float64(len(data)))
 	p := newPerceptron(len(data[0]))
-	p.learn(data[:count], class[:count], trainer, 0.1)
+	p.learn(data[:count], class[:count], trainer, 0.01)
 	return p.verify(data[count:], class[count:])
 }

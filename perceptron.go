@@ -35,11 +35,7 @@ func (p *perceptron) feedForward(input []float64) float64 {
 	for i := range input {
 		result += input[i] * p.weights[i]
 	}
-	if 0 < result {
-		return 1
-	}
-	return 0
-	// return result
+	return threshold(result)
 }
 
 // backPropagate adjusts the weights by rate x delta given an
@@ -56,7 +52,6 @@ func (p *perceptron) backPropagate(input []float64, delta, rate float64) {
 // the learning rate.
 func (p *perceptron) learn(inputs [][]float64, class []float64, trainer func([]float64, float64) float64, rate float64) {
 	for i := range inputs {
-		// fmt.Printf("input = %0.2f, %0.2f, trainer = %0.2f, feedForward = %0.2f, delta = %0.2f\n", inputs[i][0], inputs[i][1], trainer(inputs[i], class[i]), p.feedForward(inputs[i]), trainer(inputs[i], class[i])-p.feedForward(inputs[i]))
 		p.backPropagate(inputs[i], trainer(inputs[i], class[i])-p.feedForward(inputs[i]), rate)
 	}
 }
@@ -66,7 +61,6 @@ func (p *perceptron) learn(inputs [][]float64, class []float64, trainer func([]f
 func (p *perceptron) verify(inputs [][]float64, class []float64) float64 {
 	var correct float64
 	for i := range inputs {
-		// fmt.Printf("input = %0.2f, %0.2f, feedForward = %0.2f\n", inputs[i][0], inputs[i][1], p.feedForward(inputs[i]))
 		if p.feedForward(inputs[i]) == class[i] {
 			correct++
 		}
