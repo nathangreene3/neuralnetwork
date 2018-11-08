@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"math/rand"
 	"os"
@@ -108,7 +109,20 @@ func (f flowers) Swap(i, j int) {
 	f[i], f[j] = f[j], f[i]
 }
 
-// trainer: TODO
-func trainer(fs flowers) float64 {
-	return 0
+// testShuffle prints all flowers that have different labels, but equal values.
+func testShuffle(f flowers) {
+	sf := sortFlowers(shuffle(f))
+	var equalValues bool
+	for i := range f {
+		equalValues = true
+		for j := range f[i].values {
+			if f[i].values[j] != sf[i].values[j] {
+				equalValues = false
+				break
+			}
+		}
+		if equalValues && f[i].label != sf[i].label {
+			fmt.Printf("%v, %v\n", f[i], sf[i])
+		}
+	}
 }

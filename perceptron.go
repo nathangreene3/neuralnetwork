@@ -64,6 +64,10 @@ func (p *perceptron) verify(inputs [][]float64, class []float64) float64 {
 		if p.feedForward(inputs[i]) == class[i] {
 			correct++
 		}
+		// 	fmt.Printf("correct: %v, %0.2f, %0.2f\n", inputs[i], class[i], p.feedForward(inputs[i]))
+		// } else {
+		// 	fmt.Printf("  error: %v, %0.2f, %0.2f\n", inputs[i], class[i], p.feedForward(inputs[i]))
+		// }
 	}
 	return correct / float64(len(inputs))
 }
