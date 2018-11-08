@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 )
 
 func main() {
@@ -11,19 +10,41 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
-	fmt.Println(f)
+	f = shuffle(f)
+	data := make([][]float64, f.Len())
+	class := make([]float64, f.Len())
+	for i := range f {
+		data[i], class[i] = f[i].values, float64(f[i].label)
+	}
+
+	// n := 1000
+	// data := make([][]float64, n)
+	// class := make([]float64, n)
+	// for i := 0; i < n; i++ {
+	// 	data[i] = []float64{rand.Float64(), rand.Float64()}
+	// 	if data[i][0] < data[i][1] {
+	// 		class[i]++
+	// 	}
+	// }
+
+	fmt.Printf(
+		"%0.2f\n",
+		run(
+			data,
+			class,
+			func(x []float64, y float64) float64 {
+				if y == 1 {
+					return 1
+				}
+				return 0
+			},
+		),
+	)
 }
 
-// run initiates and trains a new perceptron given a training
-// function and data to train with and process.
-func run(dimensions int, trainer func([]float64) float64) {
-	p := newPerceptron(dimensions)
-	inputs := make([][]float64, 100)
-	for i := range inputs {
-		inputs[i] = make([]float64, dimensions)
-		for j := range inputs[i] {
-			inputs[i][j] = 2*rand.Float64() - 1.0
-		}
-	}
-	p.learn(inputs, trainer, 0.1)
+func run(data [][]float64, class []float64, trainer func([]float64, float64) float64) float64 {
+	count := int(0.8 * float64(len(data)))
+	p := newPerceptron(len(data[0]))
+	p.learn(data[:count], class[:count], trainer, 0.1)
+	return p.verify(data[count:], class[count:])
 }

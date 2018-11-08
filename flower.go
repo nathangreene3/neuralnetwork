@@ -75,11 +75,11 @@ func getFlowers(filename string) (flowers, error) {
 	return flowers, nil
 }
 
-// shuffle shuffles a deep copy of flowers.
+// shuffle returns a shuffled deep copy of flowers.
 func shuffle(f flowers) flowers {
 	sf := make(flowers, len(f))
 	copy(sf, f)
-	rand.Shuffle(len(sf), func(i, j int) { sf[i], sf[j] = sf[j], sf[i] })
+	rand.Shuffle(sf.Len(), sf.Swap)
 	return sf
 }
 
