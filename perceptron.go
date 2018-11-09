@@ -13,7 +13,7 @@ func (p *perceptron) String() string {
 	for i := range p.weights {
 		a[i] = fmt.Sprintf("%0.2f", p.weights[i])
 	}
-	return "[" + strings.Join(a, ", ") + fmt.Sprintf("], %0.2f", p.bias)
+	return fmt.Sprintf("[%s], %0.2f", strings.Join(a, ", "), p.bias)
 }
 
 // perceptron consists of a set of weights and a bias.

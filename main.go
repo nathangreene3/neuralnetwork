@@ -19,14 +19,14 @@ func main() {
 	// 	data[i], class[i] = f[i].values, float64(f[i].label)
 	// }
 
-	dims := 1
+	dims := 10
 	var n int
 	for i := 0; i < 6; i++ {
 		n = int(math.Pow10(i + 1))
 		data := getRandData(dims, n)
 		class := make([]float64, n)
 		for i := range data {
-			if 0 < fn(data[i]) {
+			if fn(data[i]) < data[i][0] {
 				class[i]++
 			}
 		}
@@ -48,10 +48,9 @@ func main() {
 }
 
 func fn(x []float64) float64 {
-	var v float64
-	v = 1
-	for i := range x {
-		v *= x[i]
+	v := float64(0)
+	for i := 1; i < len(x); i++ {
+		v += x[i]
 	}
 	return v
 }
@@ -74,11 +73,6 @@ func run(data [][]float64, class []float64, trainer func([]float64, float64) flo
 	count := int(0.333 * float64(len(data)))
 	p := newPerceptron(len(data[0]))
 	p.learn(data[:count], class[:count], trainer, 0.01)
-	fmt.Print("weights = [ ")
-	for i := range p.weights {
-		fmt.Printf("%0.2f ", p.weights[i])
-	}
-	fmt.Print("], ")
-	fmt.Printf("bias = %0.2f\n", p.bias)
+	fmt.Println(p.String())
 	return p.verify(data[count:], class[count:])
 }

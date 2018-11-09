@@ -77,6 +77,19 @@ func getFlowers(filename string) (flowers, error) {
 	return flowers, nil
 }
 
+func (f flowers) removeDuplicates() flowers {
+	n := len(f)
+	fs := make(flowers, n)
+	copy(fs, f)
+	sort.Stable(fs)
+	for i := 0; i+1 < n; i++ {
+		if fs[i] == fs[i+1] {
+
+		}
+	}
+	return fs
+}
+
 // shuffle returns a shuffled deep copy of flowers.
 func shuffle(f flowers) flowers {
 	sf := make(flowers, len(f))
