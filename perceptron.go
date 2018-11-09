@@ -1,5 +1,21 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
+var _ = fmt.Stringer(&perceptron{})
+
+func (p *perceptron) String() string {
+	n := len(p.weights)
+	a := make([]string, n)
+	for i := range p.weights {
+		a[i] = fmt.Sprintf("%0.2f", p.weights[i])
+	}
+	return "[" + strings.Join(a, ", ") + fmt.Sprintf("], %0.2f", p.bias)
+}
+
 // perceptron consists of a set of weights and a bias.
 type perceptron struct {
 	// weights is an ordered set of real values
@@ -64,10 +80,6 @@ func (p *perceptron) verify(inputs [][]float64, class []float64) float64 {
 		if p.feedForward(inputs[i]) == class[i] {
 			correct++
 		}
-		// 	fmt.Printf("correct: %v, %0.2f, %0.2f\n", inputs[i], class[i], p.feedForward(inputs[i]))
-		// } else {
-		// 	fmt.Printf("  error: %v, %0.2f, %0.2f\n", inputs[i], class[i], p.feedForward(inputs[i]))
-		// }
 	}
 	return correct / float64(len(inputs))
 }
