@@ -209,3 +209,14 @@ func run(data [][]float64, class []float64, trainer func([]float64, float64) flo
 	p.learn(data[:count], class[:count], trainer, 0.01)
 	return p.verify(data[count:], class[count:])
 }
+
+func runNN(data [][]float64, class []float64, trainer0 func([]float64, float64) float64, trainer1 func([]float64, float64) float64) float64 {
+	dims := len(data[0])
+	count := int(0.75 * float64(len(data)))
+	p := newPerceptron(dims)
+	p.learn(data[:count], class[:count], trainer0, 0.01)
+
+	q := newPerceptron(dims)
+	q.learn(data[:count], class[:count], trainer1, 0.01)
+	return 0
+}
