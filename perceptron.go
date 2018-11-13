@@ -5,8 +5,11 @@ import (
 	"strings"
 )
 
+// Stringer does something in using perceptron.String.
 var _ = fmt.Stringer(&perceptron{})
 
+// String returns a formatted string representation of a perceptron.
+// A perceptron is represented as "[weights], [bias]": [0.0, ..., 0.0], 0.0.
 func (p *perceptron) String() string {
 	n := len(p.weights)
 	a := make([]string, n)
@@ -75,10 +78,10 @@ func (p *perceptron) learn(inputs [][]float64, class []float64, trainer func([]f
 // verify returns the ratio of the number of correct
 // classifications to the total number of inputs to classify.
 func (p *perceptron) verify(inputs [][]float64, class []float64) float64 {
-	var correct float64
+	correct := float64(len(inputs))
 	for i := range inputs {
-		if p.feedForward(inputs[i]) == class[i] {
-			correct++
+		if p.feedForward(inputs[i]) != class[i] {
+			correct--
 		}
 	}
 	return correct / float64(len(inputs))
