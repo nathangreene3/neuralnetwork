@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -12,19 +13,77 @@ func main() {
 	runORGate()
 	runNANDGate()
 	runXORGate()
+	// runFlowers()
+	// runCircle()
 }
 
+// run trains a new perceptron and returns verification of its
+// successful classification.
+func run(data [][]float64, class []float64) float64 {
+	p := newPerceptron(len(data[0]))
+	p.learn(data, class, 0.01)
+	return p.verify(data, class)
+}
+
+// getRandData returns random values on the range [0,1).
+func getRandData(dims, count int) [][]float64 {
+	rand.Seed(int64(time.Now().Second()))
+	data := make([][]float64, count)
+	for i := 0; i < count; i++ {
+		data[i] = make([]float64, dims)
+		for j := 0; j < dims; j++ {
+			data[i][j] = rand.Float64()
+		}
+	}
+	return data
+}
+
+// getBinaryPairs returns n random assortments of the binary
+// pairs: (0,0), (0,1), (1,0), and (1,1).
+func getBinaryPairs(n int) [][]float64 {
+	rand.Seed(int64(time.Now().Second()))
+	pairs := make([][]float64, n)
+	for i := range pairs {
+		pairs[i] = []float64{float64(rand.Intn(2)), float64(rand.Intn(2))}
+	}
+	return pairs
+}
+
+// runCircle attempts to train a perceptron to determine if
+// points are inside a circle. Random points and the center are
+// generated on the range [0,1) and the radius is a random
+// value on the range [0,0.5).
+func runCircle() {
+	rand.Seed(int64(time.Now().Second()))
+	center := []float64{rand.Float64(), rand.Float64()}
+	radius := rand.Float64() / 2
+	n := 1000
+	data := getRandData(2, n)
+	class := make([]float64, n)
+	for i := range class {
+		if (data[i][0]-center[0])*(data[i][0]-center[0])+(data[i][1]-center[1])*(data[i][1]-center[1]) <= math.Pow(radius, 2) {
+			class[i] = 1
+		}
+	}
+	fmt.Printf("%0.2f\n", run(data, class))
+}
+
+// runFlowers attempts to train a perceptron to determine
+// flower classification on a set of flowers imported from a
+// csv file.
 func runFlowers() {
-	// f, err := getFlowers("iris.csv")
-	// if err != nil {
-	// 	log.Fatalf("%v\n", err)
-	// }
-	// f = shuffle(f)
-	// data := make([][]float64, f.Len())
-	// class := make([]float64, f.Len())
-	// for i := range f {
-	// 	data[i], class[i] = f[i].values, float64(f[i].label)
-	// }
+	f, err := getFlowers("iris.csv")
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+	f = shuffle(f)
+	n := f.Len()
+	data := make([][]float64, n)
+	class := make([]float64, n)
+	for i := range f {
+		data[i], class[i] = f[i].values, float64(f[i].label)
+	}
+	fmt.Printf("result = %0.2f\n", run(data, class))
 }
 
 func runXLessY() {
@@ -39,20 +98,7 @@ func runXLessY() {
 				class[i]++
 			}
 		}
-		fmt.Printf(
-			"result = %0.2f\n",
-			run(
-				data,
-				class,
-				func(x []float64, y float64) float64 {
-					if int(y) == 1 {
-						return 1
-					}
-					return 0
-				},
-			),
-		)
-		fmt.Println()
+		fmt.Printf("result = %0.2f\n", run(data, class))
 	}
 }
 
@@ -63,15 +109,7 @@ func runANDGate() {
 	for i := range class {
 		class[i] = and(data[i])
 	}
-	fmt.Println(
-		run(
-			data,
-			class,
-			func(x []float64, y float64) float64 {
-				return y
-			},
-		),
-	)
+	fmt.Println(run(data, class))
 }
 
 func runORGate() {
@@ -81,15 +119,7 @@ func runORGate() {
 	for i := range class {
 		class[i] = or(data[i])
 	}
-	fmt.Println(
-		run(
-			data,
-			class,
-			func(x []float64, y float64) float64 {
-				return y
-			},
-		),
-	)
+	fmt.Println(run(data, class))
 }
 
 func runNANDGate() {
@@ -99,15 +129,7 @@ func runNANDGate() {
 	for i := range class {
 		class[i] = nand(data[i])
 	}
-	fmt.Println(
-		run(
-			data,
-			class,
-			func(x []float64, y float64) float64 {
-				return y
-			},
-		),
-	)
+	fmt.Println(run(data, class))
 }
 
 // runXORGate demonstrates the failure to classify xor correctly.
@@ -118,15 +140,7 @@ func runXORGate() {
 	for i := range class {
 		class[i] = xor(data[i])
 	}
-	fmt.Println(
-		run(
-			data,
-			class,
-			func(x []float64, y float64) float64 {
-				return y
-			},
-		),
-	)
+	fmt.Println(run(data, class))
 }
 
 func and(x []float64) float64 {
@@ -174,49 +188,4 @@ func fn(x []float64) float64 {
 		v += x[i]
 	}
 	return v
-}
-
-// getRandData returns random values on the range [0,1).
-func getRandData(dims, count int) [][]float64 {
-	rand.Seed(int64(time.Now().Second()))
-	data := make([][]float64, count)
-	for i := 0; i < count; i++ {
-		data[i] = make([]float64, dims)
-		for j := 0; j < dims; j++ {
-			data[i][j] = rand.Float64()
-		}
-	}
-	return data
-}
-
-// getBinaryPairs returns n random assortments of the binary pairs:
-// [0,0], [0,1], [1,0], and [1,1].
-func getBinaryPairs(n int) [][]float64 {
-	rand.Seed(int64(time.Now().Second()))
-	pairs := make([][]float64, n)
-	for i := range pairs {
-		pairs[i] = make([]float64, 2)
-		pairs[i][0] = float64(rand.Intn(2))
-		pairs[i][1] = float64(rand.Intn(2))
-	}
-	return pairs
-}
-
-// run trains a new perceptron and returns verification of its successful classification.
-func run(data [][]float64, class []float64, trainer func([]float64, float64) float64) float64 {
-	count := int(0.75 * float64(len(data)))
-	p := newPerceptron(len(data[0]))
-	p.learn(data[:count], class[:count], trainer, 0.01)
-	return p.verify(data[count:], class[count:])
-}
-
-func runNN(data [][]float64, class []float64, trainer0 func([]float64, float64) float64, trainer1 func([]float64, float64) float64) float64 {
-	dims := len(data[0])
-	count := int(0.75 * float64(len(data)))
-	p := newPerceptron(dims)
-	p.learn(data[:count], class[:count], trainer0, 0.01)
-
-	q := newPerceptron(dims)
-	q.learn(data[:count], class[:count], trainer1, 0.01)
-	return 0
 }

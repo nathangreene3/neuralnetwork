@@ -5,6 +5,18 @@ import (
 	"strings"
 )
 
+// perceptron.go
+// Nathan Greene
+// Fall 2018
+
+// perceptron consists of a set of weights and a bias.
+type perceptron struct {
+	// weights is an ordered set of real values
+	weights []float64
+	// bias is the default weight applied
+	bias float64
+}
+
 // Stringer does something in using perceptron.String.
 var _ = fmt.Stringer(&perceptron{})
 
@@ -17,14 +29,6 @@ func (p *perceptron) String() string {
 		a[i] = fmt.Sprintf("%0.2f", p.weights[i])
 	}
 	return fmt.Sprintf("[%s], %0.2f", strings.Join(a, ", "), p.bias)
-}
-
-// perceptron consists of a set of weights and a bias.
-type perceptron struct {
-	// weights is an ordered set of real values
-	weights []float64
-	// bias is the default weight applied
-	bias float64
 }
 
 // threshold is a simple decision function alternative to the
@@ -69,9 +73,9 @@ func (p *perceptron) backPropagate(input []float64, delta, rate float64) {
 // learn trains the perceptron given a set of training data
 // (inputs), a function accepting training data (trainer), and
 // the learning rate.
-func (p *perceptron) learn(inputs [][]float64, class []float64, trainer func([]float64, float64) float64, rate float64) {
+func (p *perceptron) learn(inputs [][]float64, class []float64, rate float64) {
 	for i := range inputs {
-		p.backPropagate(inputs[i], trainer(inputs[i], class[i])-p.feedForward(inputs[i]), rate)
+		p.backPropagate(inputs[i], class[i]-p.feedForward(inputs[i]), rate)
 	}
 }
 

@@ -94,6 +94,29 @@ func sortFlowers(f flowers) flowers {
 	return sf
 }
 
+// split returns a map of (species,flowers).
+func (f flowers) split() map[species]flowers {
+	var m map[species]flowers
+	var ok bool
+	for i := range f {
+		if _, ok = m[f[i].label]; ok {
+			m[f[i].label] = append(m[f[i].label], f[i])
+		} else {
+			m[f[i].label] = flowers{f[i]}
+		}
+	}
+	return m
+}
+
+func (f flowers) labels() []species {
+	m := f.split()
+	labels := make([]species, 0, len(m))
+	for label := range m {
+		labels = append(labels, label)
+	}
+	return labels
+}
+
 // Len returns the number of flowers.
 func (f flowers) Len() int {
 	return len(f)
