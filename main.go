@@ -143,6 +143,8 @@ func runXORGate() {
 	fmt.Println(run(data, class))
 }
 
+// and returns one (true) if both entries are one and zero (false)
+// otherwise. Assumes x holds two values on the set {0,1}.
 func and(x []float64) float64 {
 	if x[0] == 1 {
 		if x[1] == 1 {
@@ -152,6 +154,8 @@ func and(x []float64) float64 {
 	return 0
 }
 
+// nand returns one (true) if neither entries are one and zero (false)
+// otherwise. Assumes x holds two values on the set {0,1}.
 func nand(x []float64) float64 {
 	if x[0] == 0 {
 		if x[1] == 0 {
@@ -161,6 +165,8 @@ func nand(x []float64) float64 {
 	return 0
 }
 
+// or returns one (true) if at least one entry is one and zero (false)
+// otherwise. Assumes x holds two values on the set {0,1}.
 func or(x []float64) float64 {
 	if x[0] == 1 {
 		return 1
@@ -171,6 +177,9 @@ func or(x []float64) float64 {
 	return 0
 }
 
+// xor returns one (true) if exactly one entry is one and the other is
+// zero. It returns zero (false) otherwise. Assumes x holds two values
+// on the set {0,1}.
 func xor(x []float64) float64 {
 	if x[0] == 1 {
 		if x[1] == 0 {
