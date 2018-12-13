@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	rand.Seed(int64(time.Now().Second()))
+
 	runANDGate()
 	runORGate()
 	runNANDGate()
@@ -25,9 +27,8 @@ func run(data [][]float64, class []float64) float64 {
 	return p.verify(data, class)
 }
 
-// getRandData returns random values on the range [0,1).
-func getRandData(dims, count int) [][]float64 {
-	rand.Seed(int64(time.Now().Second()))
+// randomData returns random values on the range [0,1).
+func randomData(dims, count int) [][]float64 {
 	data := make([][]float64, count)
 	for i := 0; i < count; i++ {
 		data[i] = make([]float64, dims)
@@ -38,15 +39,10 @@ func getRandData(dims, count int) [][]float64 {
 	return data
 }
 
-// getBinaryPairs returns n random assortments of the binary
+// binaryPairs returns n random assortments of the binary
 // pairs: (0,0), (0,1), (1,0), and (1,1).
-func getBinaryPairs(n int) [][]float64 {
-	rand.Seed(int64(time.Now().Second()))
-	pairs := make([][]float64, n)
-	for i := range pairs {
-		pairs[i] = []float64{float64(rand.Intn(2)), float64(rand.Intn(2))}
-	}
-	return pairs
+func binaryPairs(n int) [][]float64 {
+	return randomData(2, n)
 }
 
 // runCircle attempts to train a perceptron to determine if
@@ -54,11 +50,10 @@ func getBinaryPairs(n int) [][]float64 {
 // generated on the range [0,1) and the radius is a random
 // value on the range [0,0.5).
 func runCircle() {
-	rand.Seed(int64(time.Now().Second()))
 	center := []float64{rand.Float64(), rand.Float64()}
 	radius := rand.Float64() / 2
 	n := 1000
-	data := getRandData(2, n)
+	data := binaryPairs(n)
 	class := make([]float64, n)
 	for i := range class {
 		if (data[i][0]-center[0])*(data[i][0]-center[0])+(data[i][1]-center[1])*(data[i][1]-center[1]) <= math.Pow(radius, 2) {
@@ -91,7 +86,7 @@ func runXLessY() {
 	var n int
 	for i := 0; i < 6; i++ {
 		n = int(math.Pow10(i + 1))
-		data := getRandData(dims, n)
+		data := randomData(dims, n)
 		class := make([]float64, n)
 		for i := range data {
 			if fn(data[i]) < data[i][0] {
@@ -104,7 +99,7 @@ func runXLessY() {
 
 func runANDGate() {
 	n := 100
-	data := getBinaryPairs(n)
+	data := binaryPairs(n)
 	class := make([]float64, n)
 	for i := range class {
 		class[i] = and(data[i])
@@ -114,7 +109,7 @@ func runANDGate() {
 
 func runORGate() {
 	n := 100
-	data := getBinaryPairs(n)
+	data := binaryPairs(n)
 	class := make([]float64, n)
 	for i := range class {
 		class[i] = or(data[i])
@@ -124,7 +119,7 @@ func runORGate() {
 
 func runNANDGate() {
 	n := 100
-	data := getBinaryPairs(n)
+	data := binaryPairs(n)
 	class := make([]float64, n)
 	for i := range class {
 		class[i] = nand(data[i])
@@ -135,7 +130,7 @@ func runNANDGate() {
 // runXORGate demonstrates the failure to classify xor correctly.
 func runXORGate() {
 	n := 100
-	data := getBinaryPairs(n)
+	data := binaryPairs(n)
 	class := make([]float64, n)
 	for i := range class {
 		class[i] = xor(data[i])
