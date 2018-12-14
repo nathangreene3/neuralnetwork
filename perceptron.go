@@ -62,7 +62,7 @@ func (p *perceptron) feedForward(input []float64) float64 {
 }
 
 // backPropagate adjusts the weights by rate x delta given an
-//  input.
+// input.
 func (p *perceptron) backPropagate(input []float64, delta, rate float64) {
 	p.bias += rate * delta
 	for i := range input {

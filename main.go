@@ -11,12 +11,13 @@ import (
 func main() {
 	rand.Seed(int64(time.Now().Second()))
 
-	runANDGate()
-	runORGate()
-	runNANDGate()
-	runXORGate()
+	// runANDGate()
+	// runORGate()
+	// runNANDGate()
+	// runXORGate()
+	// runXLessY()
 	// runFlowers()
-	// runCircle()
+	runCircle()
 }
 
 // run trains a new perceptron and returns verification of its
@@ -27,40 +28,24 @@ func run(data [][]float64, class []float64) float64 {
 	return p.verify(data, class)
 }
 
-// randomData returns random values on the range [0,1).
-func randomData(dims, count int) [][]float64 {
-	data := make([][]float64, count)
-	for i := 0; i < count; i++ {
-		data[i] = make([]float64, dims)
-		for j := 0; j < dims; j++ {
-			data[i][j] = rand.Float64()
-		}
-	}
-	return data
-}
-
-// binaryPairs returns n random assortments of the binary
-// pairs: (0,0), (0,1), (1,0), and (1,1).
-func binaryPairs(n int) [][]float64 {
-	return randomData(2, n)
-}
-
 // runCircle attempts to train a perceptron to determine if
 // points are inside a circle. Random points and the center are
 // generated on the range [0,1) and the radius is a random
 // value on the range [0,0.5).
 func runCircle() {
-	center := []float64{rand.Float64(), rand.Float64()}
-	radius := rand.Float64() / 2
-	n := 1000
-	data := binaryPairs(n)
+	// center := []float64{rand.Float64(), rand.Float64()}
+	// radius := rand.Float64() / 2
+	center := []float64{0.5, 0.5}
+	radius := float64(0.25)
+	n := 1000000
+	data := randomData(2, n)
 	class := make([]float64, n)
 	for i := range class {
 		if (data[i][0]-center[0])*(data[i][0]-center[0])+(data[i][1]-center[1])*(data[i][1]-center[1]) <= math.Pow(radius, 2) {
-			class[i] = 1
+			class[i]++
 		}
 	}
-	fmt.Printf("%0.2f\n", run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
 // runFlowers attempts to train a perceptron to determine
@@ -71,6 +56,7 @@ func runFlowers() {
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
+
 	f = shuffle(f)
 	n := f.Len()
 	data := make([][]float64, n)
@@ -78,25 +64,25 @@ func runFlowers() {
 	for i := range f {
 		data[i], class[i] = f[i].values, float64(f[i].label)
 	}
-	fmt.Printf("result = %0.2f\n", run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
+// runXLessY trains a perceptron to determine if the first of two values
+// is less than the second.
 func runXLessY() {
-	dims := 10
-	var n int
-	for i := 0; i < 6; i++ {
-		n = int(math.Pow10(i + 1))
-		data := randomData(dims, n)
-		class := make([]float64, n)
-		for i := range data {
-			if fn(data[i]) < data[i][0] {
-				class[i]++
-			}
+	n := 10000 // This takes a lot of test data to converge for some reason; it is linearly separable
+	data := randomData(2, n)
+	class := make([]float64, n)
+	for i := range class {
+		if data[i][0] < data[i][1] {
+			class[i]++
 		}
-		fmt.Printf("result = %0.2f\n", run(data, class))
 	}
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
+// runANDGate trains a perceptron to determine if two values are equal
+// to one.
 func runANDGate() {
 	n := 100
 	data := binaryPairs(n)
@@ -104,9 +90,11 @@ func runANDGate() {
 	for i := range class {
 		class[i] = and(data[i])
 	}
-	fmt.Println(run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
+// runORGate trains a perceptron to determine if at least one of two
+// values is one.
 func runORGate() {
 	n := 100
 	data := binaryPairs(n)
@@ -114,9 +102,11 @@ func runORGate() {
 	for i := range class {
 		class[i] = or(data[i])
 	}
-	fmt.Println(run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
+// runNANDGate trains a perceptron to determine if two values are equal
+// to zero.
 func runNANDGate() {
 	n := 100
 	data := binaryPairs(n)
@@ -124,7 +114,7 @@ func runNANDGate() {
 	for i := range class {
 		class[i] = nand(data[i])
 	}
-	fmt.Println(run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
 // runXORGate demonstrates the failure to classify xor correctly.
@@ -135,7 +125,7 @@ func runXORGate() {
 	for i := range class {
 		class[i] = xor(data[i])
 	}
-	fmt.Println(run(data, class))
+	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
 // and returns one (true) if both entries are one and zero (false)
@@ -186,10 +176,27 @@ func xor(x []float64) float64 {
 	return 0
 }
 
-func fn(x []float64) float64 {
-	v := float64(0)
-	for i := 1; i < len(x); i++ {
-		v += x[i]
+// randomData returns random values on the range [0,1).
+func randomData(dims, count int) [][]float64 {
+	data := make([][]float64, count)
+	for i := 0; i < count; i++ {
+		data[i] = make([]float64, dims)
+		for j := 0; j < dims; j++ {
+			data[i][j] = rand.Float64()
+		}
 	}
-	return v
+	return data
+}
+
+// binaryPairs returns n random assortments of the binary
+// pairs: (0,0), (0,1), (1,0), and (1,1).
+func binaryPairs(n int) [][]float64 {
+	data := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		data[i] = []float64{
+			math.Round(rand.Float64()),
+			math.Round(rand.Float64()),
+		}
+	}
+	return data
 }
