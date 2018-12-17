@@ -17,7 +17,8 @@ func main() {
 	// runXORGate()
 	// runXLessY()
 	// runFlowers()
-	runCircle()
+	// runCircle()
+	runXORGateNN()
 }
 
 // run trains a new perceptron and returns verification of its
@@ -126,6 +127,36 @@ func runXORGate() {
 		class[i] = xor(data[i])
 	}
 	fmt.Printf("result: %0.2f\n", run(data, class))
+}
+
+// runXORGateNN trains two perceptrons on and and nand results on
+// binary pairs. The xor logic gate is generated as the nand
+// result of and and nand results.
+func runXORGateNN() {
+	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}} // Expected result of {0, 1, 1, 0}
+
+	// Classify data
+	andClass := make([]float64, 4)
+	nandClass := make([]float64, 4)
+	for i := range data {
+		andClass[i] = and(data[i])
+		nandClass[i] = nand(data[i])
+	}
+
+	// Train perceptrons
+	andNeuron := newPerceptron(2)
+	nandNeuron := newPerceptron(2)
+	rate := 0.01
+	for andNeuron.verify(data, andClass) < 1.0 {
+		andNeuron.learn(data, andClass, rate)
+	}
+	for nandNeuron.verify(data, nandClass) < 1.0 {
+		nandNeuron.learn(data, nandClass, rate)
+	}
+
+	for i := range data {
+		fmt.Printf("result on %v: %0.0f\n", data[i], nandNeuron.feedForward([]float64{andNeuron.feedForward(data[i]), nandNeuron.feedForward(data[i])}))
+	}
 }
 
 // and returns one (true) if both entries are one and zero (false)
