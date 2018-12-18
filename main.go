@@ -18,8 +18,7 @@ func main() {
 	// runXLessY()
 	// runFlowers()
 	// runCircle()
-	// runXORGateNN()
-	runIsEven()
+	runXORGateNN()
 }
 
 // run trains a new perceptron and returns verification of its
@@ -132,7 +131,8 @@ func runXORGate() {
 
 // runXORGateNN trains two perceptrons on and and nand results on
 // binary pairs. The xor logic gate is generated as the nand
-// result of and and nand results.
+// result of and and nand results. This is logically equivalent to
+// XOR(x,y) = NAND(AND(x,y), NAND(x,y)).
 func runXORGateNN() {
 	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}} // Expected result: {0, 1, 1, 0}
 
@@ -159,17 +159,6 @@ func runXORGateNN() {
 	for i := range data {
 		fmt.Printf("result on %v: %0.0f\n", data[i], nandNeuron.feedForward([]float64{andNeuron.feedForward(data[i]), nandNeuron.feedForward(data[i])}))
 	}
-}
-
-func runIsEven() {
-	n := 100000
-	data := make([][]float64, n)
-	class := make([]float64, n)
-	for i := range data {
-		data[i] = []float64{float64(rand.Intn(10))}
-		class[i] = isEven(data[i][0])
-	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
 }
 
 // and returns one (true) if both entries are one and zero (false)
@@ -215,13 +204,6 @@ func xor(x []float64) float64 {
 			return 1
 		}
 	} else if x[1] == 1 {
-		return 1
-	}
-	return 0
-}
-
-func isEven(x float64) float64 {
-	if int(x)%2 == 0 {
 		return 1
 	}
 	return 0
