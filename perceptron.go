@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -42,6 +43,11 @@ func threshold(x float64) float64 {
 	return 0
 }
 
+// sigmoid returns a value on the range (0,1) for any real x.
+func sigmoid(x float64) float64 {
+	return 1.0 / (1 + 1/math.Exp(x))
+}
+
 // newPerceptron initiates an empty perceptron with a specified number of
 // dimensions. All weights and the bias are set to zero.
 func newPerceptron(dimensions int) *perceptron {
@@ -58,7 +64,7 @@ func (p *perceptron) feedForward(input []float64) float64 {
 	for i := range input {
 		result += input[i] * p.weights[i]
 	}
-	return threshold(result)
+	return sigmoid(result) // threshold(result)
 }
 
 // backPropagate adjusts the weights by rate x delta given an input.

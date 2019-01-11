@@ -11,6 +11,7 @@ import (
 func main() {
 	rand.Seed(int64(time.Now().Second()))
 
+	// USE THRESHOLD INSTEAD FOR THESE
 	// runANDGate()
 	// runORGate()
 	// runNANDGate()
@@ -18,7 +19,17 @@ func main() {
 	// runXLessY()
 	// runFlowers()
 	// runCircle()
-	runXORGateNN()
+	// runXORGateNN()
+
+	// USE SIGMOID FOR THESE
+	// runXORGateNN2()
+
+	x := []float64{1, 2, 3}
+	y := deepCopy(x)
+	x[0] = 0
+	x[1] = 0
+	x[2] = 0
+	fmt.Println(x, y)
 }
 
 // run trains a new perceptron and returns verification of its
@@ -159,6 +170,11 @@ func runXORGateNN() {
 	for i := range data {
 		fmt.Printf("result on %v: %0.0f\n", data[i], nandNeuron.feedForward([]float64{andNeuron.feedForward(data[i]), nandNeuron.feedForward(data[i])}))
 	}
+}
+
+func runXORGateNN2() {
+	// data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}} // Expected result: {0, 1, 1, 0}
+
 }
 
 // and returns one (true) if both entries are one and zero (false)
