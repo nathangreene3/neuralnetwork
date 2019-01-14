@@ -20,6 +20,23 @@ func (lr layer) String() string {
 	return strings.Join(s, "\n")
 }
 
+// newLayer returns a layer consisting of a number of nodes each of a
+// given dimension.
+func newLayer(dims, numNodes int) layer {
+	if numNodes < 1 {
+		panic("number of nodes in layer must be positive")
+	}
+	if dims < 1 {
+		panic("number of dimensions in a perceptron must be positive")
+	}
+
+	lr := make(layer, 0, numNodes)
+	for i := 0; i < numNodes; i++ {
+		lr = append(lr, newPerceptron(dims))
+	}
+	return lr
+}
+
 // feedForward returns the output of each perceptron in this
 // layer.
 func (lr layer) feedForward(input []float64) []float64 {
@@ -31,17 +48,8 @@ func (lr layer) feedForward(input []float64) []float64 {
 }
 
 // backPropagate updates each perceptron in this layer.
-func (lr layer) backPropagate(input []float64, delta, rate float64) {
+func (lr layer) backPropagate(input []float64, delta float64) {
 	for i := range lr {
-		lr[i].backPropagate(input, delta, rate)
-	}
-}
-
-// learn TODO: this is not called by nn.learn. Maybe it should be?
-func (lr layer) learn(inputs [][]float64, class []float64, rate float64) {
-	for i := range inputs {
-		for j := range lr {
-			lr.backPropagate(inputs[i], class[i]-lr[j].feedForward(inputs[i], sigmoid), rate)
-		}
+		lr[i].backPropagate(input, delta)
 	}
 }

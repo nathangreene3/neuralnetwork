@@ -19,30 +19,39 @@ func main() {
 	// runXLessY()
 	// runFlowers()
 	// runCircle()
-	// runXORGateNN()
+	runXORGateNN()
 
 	// USE SIGMOID FOR THESE
-	runXORGateNN2()
+	// runXORGateNN2()
 }
 
-// run trains a new perceptron and returns verification of its
-// successful classification.
-func run(data [][]float64, class []float64) float64 {
+// run trains a new perceptron and returns verification of its successful
+// classification.
+func runP(data [][]float64, class []float64) (*perceptron, float64) {
 	p := newPerceptron(len(data[0]))
-	p.learn(threshold, data, class, 0.01)
-	return p.verify(data, class, threshold)
+	p.learn(threshold, data, class)
+	return p, p.verify(data, class, threshold)
 }
 
-// runCircle attempts to train a perceptron to determine if
-// points are inside a circle. Random points and the center are
-// generated on the range [0,1) and the radius is a random
-// value on the range [0,0.5).
+// runNN TODO
+func runNN(data [][]float64, class []float64) (neuralNetwork, float64) {
+	return nil, 0
+}
+
+//-----------------------------------------------------------------------
+// Training scenarios
+// These functions train a perceptron or a neural network to classify
+// various types of data.
+//-----------------------------------------------------------------------
+
+// runCircle attempts to train a perceptron to determine if points are
+// inside a circle. Random points and the center are generated on the
+// range [0,0.5). The radius is generated as a random value on the range
+// [0,0.5).
 func runCircle() {
-	// center := []float64{rand.Float64(), rand.Float64()}
-	// radius := rand.Float64() / 2
-	center := []float64{0.5, 0.5}
-	radius := float64(0.25)
-	n := 1000000
+	center := []float64{rand.Float64(), rand.Float64()}
+	radius := rand.Float64() / 2
+	n := 1000
 	data := randomData(2, n)
 	class := make([]float64, n)
 	for i := range class {
@@ -50,12 +59,12 @@ func runCircle() {
 			class[i]++
 		}
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
-// runFlowers attempts to train a perceptron to determine
-// flower classification on a set of flowers imported from a
-// csv file.
+// runFlowers attempts to train a perceptron to determine flower
+// classification on a set of flowers imported from a csv file.
 func runFlowers() {
 	f, err := getFlowers("iris.csv")
 	if err != nil {
@@ -69,7 +78,8 @@ func runFlowers() {
 	for i := range f {
 		data[i], class[i] = f[i].values, float64(f[i].label)
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
 // runXLessY trains a perceptron to determine if the first of two values
@@ -83,11 +93,12 @@ func runXLessY() {
 			class[i]++
 		}
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
-// runANDGate trains a perceptron to determine if two values are equal
-// to one.
+// runANDGate trains a perceptron to determine if two values are equal to
+// one.
 func runANDGate() {
 	n := 100
 	data := binaryPairs(n)
@@ -95,7 +106,8 @@ func runANDGate() {
 	for i := range class {
 		class[i] = and(data[i])
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
 // runORGate trains a perceptron to determine if at least one of two
@@ -107,7 +119,8 @@ func runORGate() {
 	for i := range class {
 		class[i] = or(data[i])
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
 // runNANDGate trains a perceptron to determine if two values are equal
@@ -119,7 +132,8 @@ func runNANDGate() {
 	for i := range class {
 		class = append(class, nand(data[i]))
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
 // runXORGate demonstrates the failure to classify xor correctly.
@@ -130,12 +144,13 @@ func runXORGate() {
 	for i := range class {
 		class[i] = xor(data[i])
 	}
-	fmt.Printf("result: %0.2f\n", run(data, class))
+	_, result := runP(data, class)
+	fmt.Printf("result: %0.2f\n", result)
 }
 
-// runXORGateNN trains two perceptrons on and and nand results on
-// binary pairs. The xor logic gate is generated as the nand
-// result of and and nand results. This is logically equivalent to
+// runXORGateNN trains two perceptrons on and and nand results on binary
+// pairs. The xor logic gate is generated as the nand result of and and
+// nand results. This is logically equivalent to
 // XOR(x,y) = NAND(AND(x,y), NAND(x,y)).
 func runXORGateNN() {
 	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}} // Expected result: {0, 1, 1, 0}
@@ -151,12 +166,11 @@ func runXORGateNN() {
 	// Train perceptrons
 	andNeuron := newPerceptron(2)
 	nandNeuron := newPerceptron(2)
-	rate := 0.01
 	for andNeuron.verify(data, andClass, threshold) < 1.0 {
-		andNeuron.learn(threshold, data, andClass, rate)
+		andNeuron.learn(threshold, data, andClass)
 	}
 	for nandNeuron.verify(data, nandClass, threshold) < 1.0 {
-		nandNeuron.learn(threshold, data, nandClass, rate)
+		nandNeuron.learn(threshold, data, nandClass)
 	}
 	fmt.Printf("andNeuron: %s\nnandNeuron: %s\n", andNeuron.String(), nandNeuron.String())
 
@@ -175,21 +189,27 @@ func runXORGateNN() {
 	}
 }
 
+// runXORGateNN2 trains a neural network to solve the xor problem.
 func runXORGateNN2() {
 	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}} // Expected result: {0, 1, 1, 0}
 	class := make([]float64, 0, len(data))
 	for i := range data {
 		class = append(class, xor(data[i]))
 	}
+
 	nn := newNeuralNetwork([]int{2, 2}, []int{2, 1})
-	for i := 0; i < 10000; i++ {
-		nn.learn(data, class, 0.01)
+	for i := 0; i < 100; i++ {
+		nn.learn(data, class)
 		fmt.Printf("%0.2f\n", nn.verify(data, class))
-		for j := range nn {
-			fmt.Println(nn[j].String())
-		}
 	}
+	fmt.Println(nn.String())
 }
+
+//-----------------------------------------------------------------------
+// Classification functions
+// These functions are helper functions that return the classification of
+// an input for training perceptrons and neural networks.
+//-----------------------------------------------------------------------
 
 // and returns one (true) if both entries are one and zero (false)
 // otherwise. Assumes x holds two values on the set {0,1}.
@@ -212,7 +232,10 @@ func nand(x []float64) float64 {
 // or returns one (true) if at least one entry is one and zero (false)
 // otherwise. Assumes x holds two values on the set {0,1}.
 func or(x []float64) float64 {
-	if x[0] == 1 || x[1] == 1 {
+	if x[0] == 1 {
+		return 1
+	}
+	if x[1] == 1 {
 		return 1
 	}
 	return 0
@@ -222,11 +245,21 @@ func or(x []float64) float64 {
 // zero. It returns zero (false) otherwise. Assumes x holds two values
 // on the set {0,1}.
 func xor(x []float64) float64 {
-	if (x[0] == 1 && x[1] == 0) || (x[0] == 0 && x[1] == 1) {
+	if x[0] == 1 {
+		if x[1] == 0 {
+			return 1
+		}
+	} else if x[1] == 1 {
 		return 1
 	}
 	return 0
 }
+
+//-----------------------------------------------------------------------
+// Helper functions
+// These functions get and manipulate data for training neural netwoks
+// and perceptrons.
+//-----------------------------------------------------------------------
 
 // randomData returns random values on the range [0,1).
 func randomData(dims, count int) [][]float64 {
@@ -245,13 +278,7 @@ func randomData(dims, count int) [][]float64 {
 func binaryPairs(n int) [][]float64 {
 	data := make([][]float64, 0, n)
 	for i := 0; i < n; i++ {
-		data = append(
-			data,
-			[]float64{
-				math.Round(rand.Float64()),
-				math.Round(rand.Float64()),
-			},
-		)
+		data = append(data, []float64{math.Round(rand.Float64()), math.Round(rand.Float64())})
 	}
 	return data
 }

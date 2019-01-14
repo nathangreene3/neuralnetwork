@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strings"
@@ -48,43 +49,60 @@ func newPerceptron(dimensions int) *perceptron {
 }
 
 // feedForward computes the perceptron decision (result) given an input
-// value. A descision function must return a value on the range [0,1].
-func (p *perceptron) feedForward(input []float64, descision func(float64) float64) float64 {
+// value. A decision function must return a value on the range [0,1].
+func (p *perceptron) feedForward(input []float64, decision func(float64) float64) float64 {
 	result := p.bias
 	for i := range input {
 		result += input[i] * p.weights[i]
 	}
-	return descision(result) // threshold, sigmoid, etc.
+	return decision(result) // threshold, sigmoid, etc.
 }
 
-// backPropagate adjusts the weights by rate x delta given an input.
-func (p *perceptron) backPropagate(input []float64, delta, rate float64) {
-	p.bias += rate * delta
+// backPropagate adjusts the weights by rate*delta given an input.
+func (p *perceptron) backPropagate(input []float64, delta float64) {
+	p.bias += delta
 	for i := range input {
-		p.weights[i] += rate * delta * input[i]
+		p.weights[i] += delta * input[i]
 	}
 }
 
 // learn trains the perceptron given a set of training data (inputs), a
 // function accepting training data (trainer), and the learning rate.
-func (p *perceptron) learn(descision func(float64) float64, inputs [][]float64, class []float64, rate float64) {
-	for i := range inputs {
-		p.backPropagate(inputs[i], class[i]-p.feedForward(inputs[i], descision), rate)
+func (p *perceptron) learn(decision func(float64) float64, inputs [][]float64, class []float64) {
+	e0, e1 := 0.0, 1.0
+	maxCount := 1000
+	for 0.01 < math.Abs(e1-e0) {
+		e0 = e1
+		for i := range inputs {
+			p.backPropagate(inputs[i], class[i]-p.feedForward(inputs[i], decision))
+		}
+		e1 = p.verify(inputs, class, decision)
+
+		maxCount--
+		if maxCount == 0 {
+			log.Fatal("perceptron failed to learn")
+		}
 	}
 }
 
 // verify returns the ratio of the number of correct classifications to
 // the total number of inputs to classify.
-func (p *perceptron) verify(inputs [][]float64, class []float64, descision func(float64) float64) float64 {
+func (p *perceptron) verify(inputs [][]float64, class []float64, decision func(float64) float64) float64 {
 	count := float64(len(inputs)) // Number of inputs
 	correct := count              // Number of correct results
 	for i := range inputs {
-		if p.feedForward(inputs[i], descision) != class[i] {
+		if p.feedForward(inputs[i], decision) != class[i] {
 			correct--
 		}
 	}
 	return correct / count
 }
+
+//-----------------------------------------------------------------------
+// Decision functions
+// These functions return a value on the range [0,1] for any real x. They
+// are used to determine what the result of a perceptron should be.
+//-----------------------------------------------------------------------
 
 // threshold is a simple decision function alternative to the logistic
 // function (sigmoid) or other decision functions. It returns 1 if x is
@@ -99,4 +117,12 @@ func threshold(x float64) float64 {
 // sigmoid returns a value on the range (0,1) for any real x.
 func sigmoid(x float64) float64 {
 	return 1 / (1 + 1/math.Exp(x))
+}
+
+// sigmoidDeriv returns the derivative of the sigmoid function evaluated
+// at x.
+func sigmoidDeriv(x float64) float64 {
+	// f(x) = 1/(1+exp(-x)) --> df(x)/dx = exp(-x)/(1+exp(-x))
+	e := math.Exp(-x)
+	return e / (1 + e)
 }
