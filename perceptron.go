@@ -37,7 +37,7 @@ func (p *perceptron) String() string {
 // newPerceptron initiates an empty perceptron with a specified number of
 // dimensions. All weights and the bias are set to zero.
 func newPerceptron(dimensions int) *perceptron {
-	// -1 < weights, bias < 1
+	// Initially, -1 < weights, bias < 1
 	p := &perceptron{
 		weights: make([]float64, 0, dimensions),
 		bias:    1 - 2*rand.Float64(),
@@ -58,7 +58,7 @@ func (p *perceptron) feedForward(input []float64, decision func(float64) float64
 	return decision(result) // threshold, sigmoid, etc.
 }
 
-// backPropagate adjusts the weights by rate*delta given an input.
+// backPropagate adjusts the weights by delta given for a given input.
 func (p *perceptron) backPropagate(input []float64, delta float64) {
 	p.bias += delta
 	for i := range input {
@@ -69,17 +69,15 @@ func (p *perceptron) backPropagate(input []float64, delta float64) {
 // learn trains the perceptron given a set of training data (inputs), a
 // function accepting training data (trainer), and the learning rate.
 func (p *perceptron) learn(decision func(float64) float64, inputs [][]float64, class []float64) {
-	e0, e1 := 0.0, 1.0
 	maxCount := 1000
-	for 0.01 < math.Abs(e1-e0) {
-		e0 = e1
+	for p.verify(inputs, class, decision) < 0.9 {
 		for i := range inputs {
-			p.backPropagate(inputs[i], class[i]-p.feedForward(inputs[i], decision))
+			p.backPropagate(inputs[i], 0.01*(class[i]-p.feedForward(inputs[i], decision)))
 		}
-		e1 = p.verify(inputs, class, decision)
 
 		maxCount--
 		if maxCount == 0 {
+			fmt.Println(p.String())
 			log.Fatal("perceptron failed to learn")
 		}
 	}

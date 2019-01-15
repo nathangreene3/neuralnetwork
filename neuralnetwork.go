@@ -25,18 +25,12 @@ func (nn neuralNetwork) String() string {
 // newNeuralNetwork returns a neural network. Each ith layer has a
 // specified number of perceptrons all of the same ith dimension. The
 // zeroth layer should have perceptron dimesions matching the input.
-func newNeuralNetwork(dimsPerLayer, numNodesPerLayer []int) neuralNetwork {
-	// Example: dimsPerLayer = {2,2}, numNodesPerLayer = {2,1}
-	// (x,y) --> P --> P --> r
-	//       --> P
-	n := len(dimsPerLayer)
-	if len(numNodesPerLayer) != n {
-		panic("dimension mismatch")
-	}
-
+func newNeuralNetwork(dims int, numNodesPerLayer []int) neuralNetwork {
+	n := len(numNodesPerLayer) // Number of layers
 	nn := make(neuralNetwork, 0, n)
-	for i := 0; i < n; i++ {
-		nn = append(nn, newLayer(dimsPerLayer[i], numNodesPerLayer[i]))
+	nn = append(nn, newLayer(dims, numNodesPerLayer[0])) // Input layer has dimensions equal to input
+	for i := 1; i < n; i++ {
+		nn = append(nn, newLayer(numNodesPerLayer[i-1], numNodesPerLayer[i]))
 	}
 	return nn
 }
@@ -47,7 +41,7 @@ func (nn neuralNetwork) feedForward(input []float64) float64 {
 	for i := range nn {
 		output = nn[i].feedForward(output)
 	}
-	return output[maxIndex(output)]
+	return float64(maxIndex(output)) // What should the output be? The value or the index?
 }
 
 // backPropagate updates each layer in the neural network.
