@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strings"
 )
@@ -36,25 +35,33 @@ func newNeuralNetwork(dims int, numNodesPerLayer []int) neuralNetwork {
 }
 
 // feedForward returns the output of the neural network.
-func (nn neuralNetwork) feedForward(input []float64) (float64, [][]float64) {
+func (nn neuralNetwork) feedForward(input []float64) float64 {
 	output := deepCopy(input)
-	outputs := make([][]float64, 0, len(nn))
 	for i := range nn {
 		output = nn[i].feedForward(output)
-		outputs = append(outputs, deepCopy(output))
 	}
-	return output[maxIndex(output)], outputs
+	return output[maxIndex(output)]
 }
 
 // backPropagate updates each layer in the neural network.
 func (nn neuralNetwork) backPropagate(input []float64, class float64) {
-	j := len(nn) - 1
-	output, outputs := nn.feedForward(input)
-	deltas := make([]float64, 0, len(outputs))
-	for i := range outputs {
-		deltas = append(deltas, outputs[i]*(1-outputs[i])*(outputs[i]-class))
+	n := len(nn) // Number of layers in neural network
+
+	// Get all outputs (same as feedForward, but keeping each result)
+	outputs := make([][]float64, 0, n)
+	output := deepCopy(input)
+	outputs = append(outputs, output)
+	for i := range nn {
+		output = nn[i].feedForward(output)
+		outputs = append(outputs, output)
 	}
 
+	// Go through all outputs from last to first and alter weights and biases according to the standard rule
+	for i := n - 1; 0 < i; i-- {
+		for j := range nn[i] {
+			nn[i][j].backPropagate(outputs[i-1], sigmoidDeriv(outputs[i][j])*(outputs[i][j]-class))
+		}
+	}
 }
 
 // learn trains a neural network given inputs, classification, and a
@@ -66,16 +73,20 @@ func (nn neuralNetwork) learn(inputs [][]float64, class []float64) {
 
 	e0, e1 := 0.0, 1.0 // Error returned from verification; nn is as good as it is going to get when error is constant
 	maxCount := 1000   // Safety check
-	for 0.01 < math.Abs(e1-e0) {
-		e0 = e1
+	for 0.0 < math.Abs(e1-e0) {
+		// e0 = e1
+		for i := range inputs {
+			nn.backPropagate(inputs[i], class[i])
+		}
+		// e1 = nn.verify(inputs, class)
 		// for i := range inputs {
-		// 	nn.backPropagate(inputs[i], sigmoidDeriv(class[i]-nn.feedForward(inputs[i])))
+		// 	fmt.Println(nn.feedForward(inputs[i]))
 		// }
-		e1 = nn.verify(inputs, class)
 
 		maxCount--
 		if maxCount == 0 {
-			log.Fatal("neural network failed to learn")
+			// log.Fatal("neural network failed to learn")
+			break
 		}
 	}
 }
@@ -90,10 +101,10 @@ func (nn neuralNetwork) verify(inputs [][]float64, class []float64) float64 {
 
 	count := float64(n)
 	correct := count
-	// for i := range inputs {
-	// 	if math.Round(nn.feedForward(inputs[i])) != class[i] {
-	// 		correct--
-	// 	}
-	// }
+	for i := range inputs {
+		if math.Round(nn.feedForward(inputs[i])) != class[i] {
+			correct--
+		}
+	}
 	return correct / count
 }

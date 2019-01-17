@@ -20,10 +20,10 @@ func main() {
 	// runXORGateNN()
 
 	// USE SIGMOID FOR THESE
-	// runXORGateNN2()
+	runXORGateNN2()
 	// runFlowersNN()
 
-	runBooKExample()
+	// runBooKExample()
 }
 
 func runBooKExample() {
@@ -180,11 +180,11 @@ func runXORGateNN2() {
 	class := classifyBinaryPairData(data, xor)
 
 	nn := newNeuralNetwork(len(data[0]), []int{2, 1})
-	for i := 0; i < 100; i++ {
-		nn.learn(data, class)
-		fmt.Printf("%0.2f\n", nn.verify(data, class))
-	}
+	nn.learn(data, class)
 	fmt.Println(nn.String())
+	for i := range data {
+		fmt.Println(nn.feedForward(data[i]))
+	}
 }
 
 //-----------------------------------------------------------------------

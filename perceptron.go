@@ -131,7 +131,8 @@ func sigmoid(x float64) float64 {
 // sigmoidDeriv returns the derivative of the sigmoid function evaluated
 // at x.
 func sigmoidDeriv(x float64) float64 {
-	// f(x) = 1/(1+exp(-x)) --> df(x)/dx = exp(-x)/(1+exp(-x))
+	// f(x) = 1/(1+exp(-x)) --> df(x)/dx = exp(-x)/(1+exp(-x)) = f(x)(1-f(x))
+	// So this effectively returns sigmoid(x)*(1-sigmoid(x))
 	e := math.Exp(-x)
 	return e / (1 + e)
 }
