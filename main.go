@@ -21,7 +21,21 @@ func main() {
 
 	// USE SIGMOID FOR THESE
 	// runXORGateNN2()
-	runFlowersNN()
+	// runFlowersNN()
+
+	runBooKExample()
+}
+
+func runBooKExample() {
+	nn := newNeuralNetwork(2, []int{2, 1})
+	nn[0][0].setWeightsBias([]float64{20, 20}, -30)
+	nn[0][1].setWeightsBias([]float64{20, 20}, -10)
+	nn[1][0].setWeightsBias([]float64{-60, 60}, -30)
+
+	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
+	for i := range data {
+		fmt.Println(nn.feedForward(data[i]))
+	}
 }
 
 // run trains a new perceptron and returns verification of its successful

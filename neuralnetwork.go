@@ -36,19 +36,25 @@ func newNeuralNetwork(dims int, numNodesPerLayer []int) neuralNetwork {
 }
 
 // feedForward returns the output of the neural network.
-func (nn neuralNetwork) feedForward(input []float64) float64 {
+func (nn neuralNetwork) feedForward(input []float64) (float64, [][]float64) {
 	output := deepCopy(input)
+	outputs := make([][]float64, 0, len(nn))
 	for i := range nn {
 		output = nn[i].feedForward(output)
+		outputs = append(outputs, deepCopy(output))
 	}
-	return float64(maxIndex(output)) // What should the output be? The value or the index?
+	return output[maxIndex(output)], outputs
 }
 
 // backPropagate updates each layer in the neural network.
-func (nn neuralNetwork) backPropagate(input []float64, delta float64) {
-	for i := range nn {
-		nn[i].backPropagate(input, delta)
+func (nn neuralNetwork) backPropagate(input []float64, class float64) {
+	j := len(nn) - 1
+	output, outputs := nn.feedForward(input)
+	deltas := make([]float64, 0, len(outputs))
+	for i := range outputs {
+		deltas = append(deltas, outputs[i]*(1-outputs[i])*(outputs[i]-class))
 	}
+
 }
 
 // learn trains a neural network given inputs, classification, and a
@@ -62,9 +68,9 @@ func (nn neuralNetwork) learn(inputs [][]float64, class []float64) {
 	maxCount := 1000   // Safety check
 	for 0.01 < math.Abs(e1-e0) {
 		e0 = e1
-		for i := range inputs {
-			nn.backPropagate(inputs[i], sigmoidDeriv(class[i]-nn.feedForward(inputs[i])))
-		}
+		// for i := range inputs {
+		// 	nn.backPropagate(inputs[i], sigmoidDeriv(class[i]-nn.feedForward(inputs[i])))
+		// }
 		e1 = nn.verify(inputs, class)
 
 		maxCount--
@@ -84,10 +90,10 @@ func (nn neuralNetwork) verify(inputs [][]float64, class []float64) float64 {
 
 	count := float64(n)
 	correct := count
-	for i := range inputs {
-		if math.Round(nn.feedForward(inputs[i])) != class[i] {
-			correct--
-		}
-	}
+	// for i := range inputs {
+	// 	if math.Round(nn.feedForward(inputs[i])) != class[i] {
+	// 		correct--
+	// 	}
+	// }
 	return correct / count
 }

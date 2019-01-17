@@ -96,6 +96,17 @@ func (p *perceptron) verify(inputs [][]float64, class []float64, decision func(f
 	return correct / count
 }
 
+// setWeightsBias force-sets the weights and bias to specified values.
+func (p *perceptron) setWeightsBias(w []float64, b float64) {
+	if len(p.weights) != len(w) {
+		log.Fatal("weight dimension mismatch")
+	}
+	for i := range p.weights {
+		p.weights[i] = w[i]
+	}
+	p.bias = b
+}
+
 //-----------------------------------------------------------------------
 // Decision functions
 // These functions return a value on the range [0,1] for any real x. They
