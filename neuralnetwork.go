@@ -59,7 +59,7 @@ func (nn neuralNetwork) backPropagate(input []float64, class float64) {
 	// Go through all outputs from last to first and alter weights and biases according to the standard rule
 	for i := n - 1; 0 < i; i-- {
 		for j := range nn[i] {
-			nn[i][j].backPropagate(outputs[i-1], sigmoidDeriv(outputs[i][j])*(outputs[i][j]-class))
+			nn[i][j].backPropagate(outputs[i-1], outputs[i][j]*(1-outputs[i][j])*(outputs[i][j]-class)) // sigmoidDeriv isn't necessary; already have output
 		}
 	}
 }
@@ -72,7 +72,7 @@ func (nn neuralNetwork) learn(inputs [][]float64, class []float64) {
 	}
 
 	e0, e1 := 0.0, 1.0 // Error returned from verification; nn is as good as it is going to get when error is constant
-	maxCount := 1000   // Safety check
+	maxCount := 10000  // Safety check
 	for 0.0 < math.Abs(e1-e0) {
 		// e0 = e1
 		for i := range inputs {
