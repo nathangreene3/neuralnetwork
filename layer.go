@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-// A layer is a list of perceptrons.
+// A layer is a list of neurons with a bias.
 type layer struct {
-	neurons    []*neuron
-	bias       float64
-	numNeurons int
-	dimensions int
+	neurons    []*neuron // List of neurons
+	bias       float64   // Bias neuron
+	numNeurons int       // Number of neurons
+	dimensions int       // Number of weights per neuron
 }
 
 var _ = fmt.Stringer(&layer{})
@@ -20,11 +20,11 @@ var _ = fmt.Stringer(&layer{})
 // String formats a layer as rows of each perceptron's default
 // string representation.
 func (lr *layer) String() string {
-	s := make([]string, 0, len(lr))
-	for i := range lr {
-		s = append(s, lr[i].String())
+	a := make([]string, 0, lr.numNeurons)
+	for i := 0; i < lr.numNeurons; i++ {
+		a = append(a, lr.neurons[i].String())
 	}
-	return strings.Join(s, "\n")
+	return strings.Join(a, "\n")
 }
 
 // newLayer returns a layer consisting of a number of nodes each of a
@@ -60,7 +60,7 @@ func (lr *layer) feedForward(input []float64) []float64 {
 	for i := range lr.neurons {
 		output = append(output, lr.neurons[i].output(input))
 	}
-	return output
+	return append(output, lr.bias)
 }
 
 // backPropagate updates each perceptron in this layer.
@@ -72,4 +72,8 @@ func (lr *layer) backPropagate(input []float64, target float64) {
 	for i := range lr.neurons {
 		lr.neurons[i].backPropagate(input, target)
 	}
+}
+
+func (lr *layer) setBias(b float64) {
+	lr.bias = b
 }

@@ -27,15 +27,15 @@ func main() {
 }
 
 func runBooKExample() {
-	nn := newNeuralNetwork(2, []int{2, 1})
-	nn[0][0].setWeightsBias([]float64{20, 20}, -30)
-	nn[0][1].setWeightsBias([]float64{20, 20}, -10)
-	nn[1][0].setWeightsBias([]float64{-60, 60}, -30)
+	// nn := newNeuralNetwork(2, []int{2, 1})
+	// nn[0][0].setWeightsBias([]float64{20, 20}, -30)
+	// nn[0][1].setWeightsBias([]float64{20, 20}, -10)
+	// nn[1][0].setWeightsBias([]float64{-60, 60}, -30)
 
-	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
-	for i := range data {
-		fmt.Println(nn.feedForward(data[i]))
-	}
+	// data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
+	// for i := range data {
+	// 	fmt.Println(nn.feedForward(data[i]))
+	// }
 }
 
 // run trains a new perceptron and returns verification of its successful
@@ -63,8 +63,11 @@ func runNN(data [][]float64, class []float64) (neuralNetwork, float64) {
 // runLogicGate
 func runLogicGate(classFn func([]float64) float64) {
 	data := [][]float64{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
-	_, result := runP(data, classifyBinaryPairData(data, classFn))
+	p, result := runP(data, classifyBinaryPairData(data, classFn))
 	fmt.Printf("result: %0.2f\n", result)
+	for i := range data {
+		fmt.Println(data[i], p.feedForward(data[i], threshold))
+	}
 }
 
 // runCircle attempts to train a perceptron to determine if points are
@@ -183,7 +186,7 @@ func runXORGateNN2() {
 	nn.learn(data, class)
 	fmt.Println(nn.String())
 	for i := range data {
-		fmt.Println(nn.feedForward(data[i]))
+		fmt.Println(data[i], nn.feedForward(data[i]))
 	}
 }
 

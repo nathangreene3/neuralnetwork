@@ -2,23 +2,24 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"strings"
 )
 
 // neuralNetwork is an ordered list of layers.
-type neuralNetwork []layer
+type neuralNetwork []*layer
 
 var _ = fmt.Stringer(&neuralNetwork{})
 
 // String formats a neural network as rows of each layer's default string
 // representation.
 func (nn neuralNetwork) String() string {
-	s := make([]string, 0, len(nn))
+	a := make([]string, 0, len(nn))
 	for i := range nn {
-		s = append(s, nn[i].String()+"\n")
+		a = append(a, nn[i].String()+"\n")
 	}
-	return strings.Join(s, "\n")
+	return strings.Join(a, "\n")
 }
 
 // newNeuralNetwork returns a neural network. Each ith layer has a
@@ -29,7 +30,7 @@ func newNeuralNetwork(dims int, numNodesPerLayer []int) neuralNetwork {
 	nn := make(neuralNetwork, 0, n)
 	nn = append(nn, newLayer(dims, numNodesPerLayer[0])) // Input layer has dimensions equal to input
 	for i := 1; i < n; i++ {
-		nn = append(nn, newLayer(numNodesPerLayer[i-1], numNodesPerLayer[i]))
+		nn = append(nn, newLayer(numNodesPerLayer[i-1]+1, numNodesPerLayer[i])) // +1 for bias in all layers except output layer
 	}
 	return nn
 }
@@ -58,8 +59,8 @@ func (nn neuralNetwork) backPropagate(input []float64, class float64) {
 
 	// Go through all outputs from last to first and alter weights and biases according to the standard rule
 	for i := n - 1; 0 < i; i-- {
-		for j := range nn[i] {
-			nn[i][j].backPropagate(outputs[i-1], outputs[i][j]*(1-outputs[i][j])*(outputs[i][j]-class)) // sigmoidDeriv isn't necessary; already have output
+		for j := range nn[i].neurons {
+			nn[i].neurons[j].backPropagate(outputs[i-1], outputs[i][j]*(1-outputs[i][j])*(outputs[i][j]-class)) // sigmoidDeriv isn't necessary; already have output
 		}
 	}
 }
@@ -72,20 +73,20 @@ func (nn neuralNetwork) learn(inputs [][]float64, class []float64) {
 	}
 
 	e0, e1 := 0.0, 1.0 // Error returned from verification; nn is as good as it is going to get when error is constant
-	maxCount := 10000  // Safety check
-	for 0.0 < math.Abs(e1-e0) {
-		// e0 = e1
+	maxCount := 1000   // Safety check
+	for 0.01 < math.Abs(e1-e0) {
+		e0 = e1
 		for i := range inputs {
 			nn.backPropagate(inputs[i], class[i])
 		}
-		// e1 = nn.verify(inputs, class)
-		// for i := range inputs {
-		// 	fmt.Println(nn.feedForward(inputs[i]))
-		// }
+		e1 = nn.verify(inputs, class)
+		for i := range inputs {
+			fmt.Println(nn.feedForward(inputs[i]))
+		}
 
 		maxCount--
 		if maxCount == 0 {
-			// log.Fatal("neural network failed to learn")
+			log.Fatal("neural network failed to learn")
 			break
 		}
 	}
