@@ -17,9 +17,6 @@ type Perceptron struct {
 	decider    Decider
 }
 
-// Stringer does something in using perceptron.String.
-var _ = fmt.Stringer(&Perceptron{})
-
 // New initiates an untrained perceptron of a specified number of dimensions.
 func New(dimensions int, decider Decider) *Perceptron {
 	// Initially, -1 < weights, bias < 1
@@ -47,7 +44,7 @@ func (p *Perceptron) FeedForward(input vector.Vector) float64 {
 
 // String returns a formatted string representation of a perceptron.
 func (p *Perceptron) String() string {
-	return fmt.Sprintf("[%0.2f], %0.2f", p.weights, p.bias)
+	return fmt.Sprintf("%0.2f, %0.2f", p.weights, p.bias)
 }
 
 // Train trains the perceptron given a set of training data (inputs), a
@@ -86,17 +83,4 @@ func (p *Perceptron) Verify(inputs matrix.Matrix, class vector.Vector) float64 {
 	}
 
 	return correct / float64(n)
-}
-
-// setWeightsBias force-sets the weights and bias to specified values.
-func (p *Perceptron) setWeightsBias(w vector.Vector, b float64) {
-	n := len(p.weights)
-	if n != len(w) {
-		log.Fatal("weight dimension mismatch")
-	}
-
-	p.bias = b
-	for i := 0; i < n; i++ {
-		p.weights[i] = w[i]
-	}
 }

@@ -28,9 +28,10 @@ func xor(x, y float64) float64 {
 		if y == 0 {
 			return 1
 		}
+		return 0
 	}
 
-	return 0
+	return y
 }
 
 func nand(x, y float64) float64 {
@@ -43,7 +44,7 @@ func nand(x, y float64) float64 {
 	return 0
 }
 
-func TestPerceptron(t *testing.T) {
+func TestPerceptronOnLogicGates(t *testing.T) {
 	var (
 		data = matrix.Matrix{
 			vector.Vector{0, 0},
@@ -51,34 +52,45 @@ func TestPerceptron(t *testing.T) {
 			vector.Vector{1, 0},
 			vector.Vector{1, 1},
 		}
-		classAND  = vector.Vector{0, 0, 0, 1}
-		classNAND = vector.Vector{1, 0, 0, 0}
-		classOR   = vector.Vector{0, 1, 1, 1}
-		classXOR  = vector.Vector{0, 1, 1, 0}
+		n         = len(data)
+		classAND  = vector.Zero(n)
+		classNAND = vector.Zero(n)
+		classOR   = vector.Zero(n)
+		classXOR  = vector.Zero(n)
 		p         = New(2, Threshold)
+		x, y      float64
 	)
 
-	p.Train(data, classAND, 0.1, 0.9)
+	for i, v := range data {
+		x, y = v[0], v[1]
+		classAND[i] = and(x, y)
+		classNAND[i] = nand(x, y)
+		classOR[i] = or(x, y)
+		classXOR[i] = xor(x, y)
+	}
+
+	p.Train(data, classAND, 0.05, 0.95)
 	correct := 100 * p.Verify(data, classAND)
 	if correct < 100 {
 		t.Fatalf("Class AND result: %0.2f%%", correct)
 	}
 
-	p.Train(data, classNAND, 0.1, 0.9)
+	p.Train(data, classNAND, 0.05, 0.95)
 	correct = 100 * p.Verify(data, classNAND)
 	if correct < 100 {
 		t.Fatalf("Class NAND result: %0.2f%%", correct)
 	}
 
-	p.Train(data, classOR, 0.1, 0.9)
+	p.Train(data, classOR, 0.05, 0.95)
 	correct = 100 * p.Verify(data, classOR)
 	if correct < 100 {
 		t.Fatalf("Class OR result: %0.2f%%", correct)
 	}
 
-	p.Train(data, classXOR, 0.1, 0.9)
-	correct = 100 * p.Verify(data, classXOR)
-	if correct < 100 {
-		t.Fatalf("Class XOR result: %0.2f%%", correct)
-	}
+	// Training on XOR should fail as XOR is not linearly separable.
+	// p.Train(data, classXOR, 0.05, 0.95)
+	// correct = 100 * p.Verify(data, classXOR)
+	// if correct < 100 {
+	// 	t.Fatalf("Class XOR result: %0.2f%%", correct)
+	// }
 }
