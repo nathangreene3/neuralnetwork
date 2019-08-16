@@ -1,4 +1,4 @@
-package perceptron
+package neuralnetwork
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ type Perceptron struct {
 	decider    Decider
 }
 
-// New initiates an untrained perceptron of a specified number of dimensions.
-func New(dimensions int, decider Decider) *Perceptron {
+// NewPerceptron initiates an untrained perceptron of a specified number of dimensions.
+func NewPerceptron(dimensions int, decider Decider) *Perceptron {
 	// Initially, -1 < weights, bias < 1
 	return &Perceptron{
 		dimensions: dimensions,

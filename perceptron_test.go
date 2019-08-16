@@ -1,4 +1,4 @@
-package perceptron
+package neuralnetwork
 
 import (
 	"testing"
@@ -57,7 +57,7 @@ func TestPerceptronOnLogicGates(t *testing.T) {
 		classNAND = vector.Zero(n)
 		classOR   = vector.Zero(n)
 		classXOR  = vector.Zero(n)
-		p         = New(2, Threshold)
+		p         = NewPerceptron(2, Threshold)
 		x, y      float64
 	)
 
