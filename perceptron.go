@@ -2,14 +2,12 @@ package neuralnetwork
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 
-	"github.com/nathangreene3/math/linalg/matrix"
 	"github.com/nathangreene3/math/linalg/vector"
 )
 
-// Perceptron is a set of weights and a bias.
+// Perceptron is linear learning model consisting of a set of weights and a bias with a deciding function to determine if an input value is one of two classifications. Classifications should be either 0.0 (false) or 1.0 (true).
 type Perceptron struct {
 	dimensions int
 	weights    vector.Vector
@@ -28,18 +26,37 @@ func NewPerceptron(dimensions int, decider Decider) *Perceptron {
 	}
 }
 
-// BackPropagate adjusts the weights by delta given for a given input.
-func (p *Perceptron) BackPropagate(input vector.Vector, delta float64) {
+// backPropagate adjusts the weights by delta given for a given input.
+func (p *Perceptron) backPropagate(input vector.Vector, delta float64) {
+	// delta is subtracted in Data Science from Scratch (output - class). Here, it is added (class - output).
+	// delta is an argument here because:
+	// * the decider's derivative may not be defined (Lookin' at you, Threshold)
+	// * the learning rate may not be given or necessary
 	deltaInput := input.Copy()
 	deltaInput.Multiply(delta)
 	p.weights.Add(deltaInput)
 	p.bias += delta
 }
 
-// FeedForward computes the perceptron decision (result) given an input
+// DefinePerceptron ...
+func DefinePerceptron(weights vector.Vector, bias float64, decider Decider) *Perceptron {
+	return &Perceptron{
+		dimensions: len(weights),
+		weights:    weights.Copy(),
+		bias:       bias,
+		decider:    decider,
+	}
+}
+
+// feedForward computes the perceptron decision (result) given an input
 // value. A decision function must return a value on the range [0,1].
-func (p *Perceptron) FeedForward(input vector.Vector) float64 {
+func (p *Perceptron) feedForward(input vector.Vector) float64 {
 	return p.decider(p.weights.Dot(input) + p.bias)
+}
+
+// Output ...
+func (p *Perceptron) Output(input vector.Vector) float64 {
+	return p.feedForward(input)
 }
 
 // String returns a formatted string representation of a perceptron.
@@ -49,35 +66,30 @@ func (p *Perceptron) String() string {
 
 // Train trains the perceptron given a set of training data (inputs), a
 // function accepting training data (trainer), and the learning rate.
-func (p *Perceptron) Train(inputs matrix.Matrix, class vector.Vector, rate, accuracy float64) {
-	var (
-		maxCount = 1000
-		n, _     = inputs.Dimensions()
-	)
+func (p *Perceptron) Train(inputs []vector.Vector, class []float64, rate, accuracy float64) {
+	n := len(inputs)
+	if n != len(class) {
+		panic("dimension mismatch")
+	}
 
-	for p.Verify(inputs, class) < accuracy {
+	for maxIters := 1 << 10; p.Verify(inputs, class) < accuracy && 0 < maxIters; maxIters-- {
 		for i := 0; i < n; i++ {
-			p.BackPropagate(inputs[i], rate*(class[i]-p.FeedForward(inputs[i])))
-		}
-
-		maxCount--
-		if maxCount == 0 {
-			fmt.Println(p.String())
-			log.Fatalf("perceptron failed to train on %0.2f", class)
+			p.backPropagate(inputs[i], rate*(class[i]-p.feedForward(inputs[i])))
 		}
 	}
 }
 
 // Verify returns the ratio of the number of correct classifications to
 // the total number of inputs to classify.
-func (p *Perceptron) Verify(inputs matrix.Matrix, class vector.Vector) float64 {
-	var (
-		correct float64
-		n, _    = inputs.Dimensions()
-	)
+func (p *Perceptron) Verify(inputs []vector.Vector, class []float64) float64 {
+	n := len(inputs)
+	if n != len(class) {
+		panic("dimension mismatch")
+	}
 
+	var correct float64
 	for i := 0; i < n; i++ {
-		if p.FeedForward(inputs[i]) == class[i] {
+		if p.feedForward(inputs[i]) == class[i] {
 			correct++
 		}
 	}

@@ -16,6 +16,26 @@ func newNeuron(dimensions int) *Neuron {
 	}
 }
 
+// define ...
+func defineNeuron(weights vector.Vector, bias float64) *Neuron {
+	return &Neuron{
+		p:          DefinePerceptron(weights, bias, Sigmoid),
+		dimensions: len(weights),
+	}
+}
+
+// backPropagate ...
+func (nr *Neuron) backPropagate(input vector.Vector, class float64) {
+	output := nr.feedForward(input)
+	nr.p.backPropagate(input, SigmoidDeriv(output)*(class-output))
+}
+
+// feedForward ...
 func (nr *Neuron) feedForward(input vector.Vector) float64 {
-	return nr.p.FeedForward(input)
+	return nr.p.feedForward(input)
+}
+
+// Output ...
+func (nr *Neuron) Output(input vector.Vector) float64 {
+	return nr.feedForward(input)
 }

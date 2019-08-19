@@ -1,6 +1,8 @@
 package neuralnetwork
 
-import "github.com/nathangreene3/math/linalg/vector"
+import (
+	"github.com/nathangreene3/math/linalg/vector"
+)
 
 // Layer is a list of neurons.
 type Layer struct {
@@ -24,6 +26,24 @@ func (lr *Layer) append(nr *Neuron) {
 	lr.size++
 }
 
+// backPropagate ...
+func (lr *Layer) backPropagate(input vector.Vector, class []float64) {
+	for i := 0; i < lr.size; i++ {
+		lr.neurons[i].backPropagate(input, class[i])
+	}
+}
+
+// defineLayer ...
+func defineLayer(neurons ...*Neuron) *Layer {
+	lr := &Layer{neurons: make([]*Neuron, 0, len(neurons))}
+	for _, nr := range neurons {
+		lr.append(nr)
+	}
+
+	return lr
+}
+
+// feedForward ...
 func (lr *Layer) feedForward(input vector.Vector) vector.Vector {
 	output := vector.Zero(lr.size)
 	for i, nr := range lr.neurons {
@@ -31,4 +51,9 @@ func (lr *Layer) feedForward(input vector.Vector) vector.Vector {
 	}
 
 	return output
+}
+
+// Output ...
+func (lr *Layer) Output(input vector.Vector) vector.Vector {
+	return lr.feedForward(input)
 }

@@ -36,3 +36,31 @@ func SigmoidDeriv(x float64) float64 {
 	y := Sigmoid(x)
 	return y * (1 - y)
 }
+
+// TanH ...
+func TanH(x float64) float64 {
+	return 2*Sigmoid(2*x) - 1
+}
+
+// TanHDeriv ...
+func TanHDeriv(x float64) float64 {
+	return 2*Sigmoid(2*x) - 1
+}
+
+// ReLU returns max{x,0}.
+func ReLU(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
+
+	return x
+}
+
+// ReLUDeriv returns 0 if x < 0 and 1 if otherwise.
+func ReLUDeriv(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
+
+	return 1
+}
