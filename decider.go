@@ -7,9 +7,7 @@ import (
 // Decider returns a value on the range [0,1] given some input.
 type Decider func(float64) float64
 
-// Threshold is a simple decision function alternative to the logistic
-// function (sigmoid) or other decision functions. It returns 1 if x is
-// positive and 0 otherwise.
+// Threshold returns one for x > 0 and zero otherwise.
 func Threshold(x float64) float64 {
 	if 0 < x {
 		return 1
@@ -28,8 +26,7 @@ func Sigmoid(x float64) float64 {
 	return y / (1 + y)
 }
 
-// SigmoidDeriv returns the derivative of the sigmoid function evaluated
-// at x.
+// SigmoidDeriv returns the derivative of the sigmoid function evaluated at x.
 func SigmoidDeriv(x float64) float64 {
 	// f'(x) = f(x)f(-x) = f(x)(1 - f(x))
 	// See sigmoid for properties of f.
@@ -37,30 +34,23 @@ func SigmoidDeriv(x float64) float64 {
 	return y * (1 - y)
 }
 
-// TanH ...
+// TanH returns the hyperbolic tangent of x.
 func TanH(x float64) float64 {
 	return 2*Sigmoid(2*x) - 1
 }
 
-// TanHDeriv ...
+// TanHDeriv returns the derivative of the hyperbolic tangent function evaluated at x.
 func TanHDeriv(x float64) float64 {
-	return 2*Sigmoid(2*x) - 1
+	y := TanH(x) + 1
+	return -y * y / 2
 }
 
-// ReLU returns max{x,0}.
+// ReLU returns max{x, 0}.
 func ReLU(x float64) float64 {
-	if x < 0 {
-		return 0
-	}
-
-	return x
+	return x * Threshold(x)
 }
 
-// ReLUDeriv returns 0 if x < 0 and 1 if otherwise.
+// ReLUDeriv returns the derivative of ReLU which is the threshold of x.
 func ReLUDeriv(x float64) float64 {
-	if x < 0 {
-		return 0
-	}
-
-	return 1
+	return Threshold(x)
 }
