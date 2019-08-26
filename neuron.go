@@ -1,41 +1,104 @@
 package neuralnetwork
 
-import "github.com/nathangreene3/math/linalg/vector"
+import (
+	"math/rand"
+
+	"github.com/nathangreene3/math"
+	"github.com/nathangreene3/math/linalg/vector"
+)
 
 // Neuron is a type of perceptron.
 type Neuron struct {
-	p          *Perceptron
 	dimensions int
+	weights    vector.Vector
+	bias       float64
 }
 
 // newNeuron of a given number of dimensions.
 func newNeuron(dimensions int) *Neuron {
 	return &Neuron{
-		p:          NewPerceptron(dimensions, Sigmoid),
 		dimensions: dimensions,
+		weights:    vector.New(dimensions, func(i int) float64 { return 1 - 2*rand.Float64() }),
+		bias:       1 - 2*rand.Float64(),
 	}
+
+	/*
+		return &Neuron{
+			p:          NewPerceptron(dimensions, Sigmoid),
+			dimensions: dimensions,
+		}
+	*/
 }
 
-// define ...
-func defineNeuron(weights vector.Vector, bias float64) *Neuron {
+// makeNeuron returns a neutron defined by a given set of weights bias.
+func makeNeuron(weights vector.Vector, bias float64) *Neuron {
 	return &Neuron{
-		p:          DefinePerceptron(weights, bias, Sigmoid),
 		dimensions: len(weights),
+		weights:    weights,
+		bias:       bias,
 	}
+
+	/*
+		return &Neuron{
+			p:          DefinePerceptron(weights, bias, Sigmoid),
+			dimensions: len(weights),
+		}
+	*/
 }
 
 // backPropagate ...
 func (nr *Neuron) backPropagate(input vector.Vector, class float64) {
-	output := nr.feedForward(input)
-	nr.p.backPropagate(input, SigmoidDeriv(output)*(class-output))
+	var (
+		output = nr.feedForward(input)
+		// delta   = SigmoidDeriv(output) * (class - output)
+		delta      = ReLUDeriv(output) * (class - output)
+		inputDelta = input.Copy()
+	)
+
+	inputDelta.Multiply(delta)
+	nr.weights.Add(inputDelta)
+	nr.bias += delta
 }
 
 // feedForward ...
 func (nr *Neuron) feedForward(input vector.Vector) float64 {
-	return nr.p.feedForward(input)
+	// return Sigmoid(nr.weights.Dot(input) + nr.bias)
+	return ReLU(nr.weights.Dot(input) + nr.bias)
 }
 
 // Output ...
 func (nr *Neuron) Output(input vector.Vector) float64 {
 	return nr.feedForward(input)
+}
+
+// train ...
+func (nr *Neuron) train(inputs []vector.Vector, classes []float64, accuracy float64) {
+	n := len(inputs)
+	if n != len(classes) {
+		panic("dimension mismatch")
+	}
+
+	for maxIters := 1 << 10; nr.verify(inputs, classes) < accuracy && 0 < maxIters; maxIters-- {
+		for i := 0; i < n; i++ {
+			nr.backPropagate(inputs[i], classes[i])
+		}
+	}
+}
+
+func (nr *Neuron) verify(inputs []vector.Vector, classes []float64) float64 {
+	n := len(inputs)
+	if n != len(classes) {
+		panic("dimension mismatch")
+	}
+
+	var correct float64
+	for i := 0; i < n; i++ {
+		// TODO: Determine if there's a problem with sigmoid or if
+		// sigmoid is incapable of greater precision than 5%.
+		if math.Approx(nr.feedForward(inputs[i]), classes[i], 0.05) {
+			correct++
+		}
+	}
+
+	return correct / float64(n)
 }

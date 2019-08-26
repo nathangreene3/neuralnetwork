@@ -28,6 +28,7 @@ func NewPerceptron(dimensions int, decider Decider) *Perceptron {
 
 // backPropagate adjusts the weights by delta given for a given input.
 func (p *Perceptron) backPropagate(input vector.Vector, delta float64) {
+	// delta = rate * f'(weights*input+bias) * (class-f(weights*input+bias))
 	// delta is subtracted in Data Science from Scratch (output - class). Here, it is added (class - output).
 	// delta is an argument here because:
 	// * the decider's derivative may not be defined (Lookin' at you, Threshold)

@@ -1,7 +1,7 @@
 package neuralnetwork
 
 import (
-	"math"
+	gomath "math"
 )
 
 // Decider returns a value on the range [0,1] given some input.
@@ -18,11 +18,9 @@ func Threshold(x float64) float64 {
 
 // Sigmoid returns a value on the range (0,1) for any real x.
 func Sigmoid(x float64) float64 {
-	// Also called the logistic.
-
 	// f(x) = 1/(1 + exp(-x)) = exp(x)/(1 + exp(x)) = 1 - f(-x)
-	// See sigmoidDeriv for properties of f'.
-	y := math.Exp(x)
+	// See SigmoidDeriv for properties of f'.
+	y := gomath.Exp(x)
 	return y / (1 + y)
 }
 
@@ -41,6 +39,7 @@ func TanH(x float64) float64 {
 
 // TanHDeriv returns the derivative of the hyperbolic tangent function evaluated at x.
 func TanHDeriv(x float64) float64 {
+	// = 4 Sigmoid(2x)(1 - Sigmoid(2x))
 	y := TanH(x) + 1
 	return -y * y / 2
 }

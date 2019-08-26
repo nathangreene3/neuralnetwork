@@ -7,6 +7,58 @@ import (
 	"github.com/nathangreene3/math/linalg/vector"
 )
 
+func TestNeuronOnLogicGates(t *testing.T) {
+	var (
+		data = matrix.Matrix{
+			vector.Vector{0, 0},
+			vector.Vector{0, 1},
+			vector.Vector{1, 0},
+			vector.Vector{1, 1},
+		}
+		n         = len(data)
+		classAND  = vector.Zero(n)
+		classNAND = vector.Zero(n)
+		classOR   = vector.Zero(n)
+		classXOR  = vector.Zero(n)
+		nr        = newNeuron(2)
+		x, y      float64
+	)
+
+	for i, v := range data {
+		x, y = v[0], v[1]
+		classAND[i] = and(x, y)
+		classNAND[i] = nand(x, y)
+		classOR[i] = or(x, y)
+		classXOR[i] = xor(x, y)
+	}
+
+	nr.train(data, classAND, 0.95)
+	correct := 100 * nr.verify(data, classAND)
+	if correct < 100 {
+		t.Fatalf("Class AND result: %0.2f%%", correct)
+	}
+
+	nr.train(data, classNAND, 0.95)
+	correct = 100 * nr.verify(data, classNAND)
+	if correct < 100 {
+		t.Fatalf("Class NAND result: %0.2f%%", correct)
+	}
+
+	nr.train(data, classOR, 0.95)
+	correct = 100 * nr.verify(data, classOR)
+	if correct < 100 {
+		t.Fatalf("Class OR result: %0.2f%%", correct)
+	}
+
+	// Training on XOR should fail as XOR is not linearly separable.
+	// nr.train(data, classXOR, 0.05, 0.95)
+	// correct = 100 * nr.verify(data, classXOR)
+	// if correct < 100 {
+	// 	t.Fatalf("Class XOR result: %0.2f%%", correct)
+	// }
+}
+
+// TestDefineNeuralNetwork is for sigmoid use only. It will fail on other deciders.
 func TestDefineNeuralNetwork(t *testing.T) {
 	var (
 		data = matrix.Matrix{
@@ -17,11 +69,11 @@ func TestDefineNeuralNetwork(t *testing.T) {
 		}
 		nnXOR = defineNeuralNetwork(
 			defineLayer(
-				defineNeuron(vector.Vector{20, 20}, -30),
-				defineNeuron(vector.Vector{20, 20}, -10),
+				makeNeuron(vector.Vector{20, 20}, -30),
+				makeNeuron(vector.Vector{20, 20}, -10),
 			),
 			defineLayer(
-				defineNeuron(vector.Vector{-60, 60}, -30),
+				makeNeuron(vector.Vector{-60, 60}, -30),
 			),
 		)
 		classXOR, output vector.Vector
@@ -40,6 +92,7 @@ func TestDefineNeuralNetwork(t *testing.T) {
 	}
 }
 
+/*
 func TestTrainNeuralNetwork(t *testing.T) {
 	var (
 		data = matrix.Matrix{
@@ -65,5 +118,6 @@ func TestTrainNeuralNetwork(t *testing.T) {
 		// classXOR[i] = xor(x, y)
 	}
 
-	nn.Train(data, classAND)
+	// nn.Train(data, classAND, 0)
 }
+*/
