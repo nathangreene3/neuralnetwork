@@ -39,9 +39,13 @@ func TanH(x float64) float64 {
 
 // TanHDeriv returns the derivative of the hyperbolic tangent function evaluated at x.
 func TanHDeriv(x float64) float64 {
-	// = 4 Sigmoid(2x)(1 - Sigmoid(2x))
-	y := TanH(x) + 1
-	return -y * y / 2
+	// y := TanH(x) + 1
+	// return -y * y / 2
+
+	// TODO: CONFIRM THIS RELATIONSHIP
+	// d/dx TanH(x)= 4 Sigmoid(2x)(1 - Sigmoid(2x))
+	y := Sigmoid(2 * x)
+	return 4 * y * (1 - y)
 }
 
 // ReLU returns max{x, 0}.
