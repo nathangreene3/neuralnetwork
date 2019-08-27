@@ -50,8 +50,8 @@ func makeNeuron(weights vector.Vector, bias float64) *Neuron {
 func (nr *Neuron) backPropagate(input vector.Vector, class float64) {
 	var (
 		output = nr.feedForward(input)
-		delta  = SigmoidDeriv(output) * (class - output)
-		// delta = ReLUDeriv(output) * (class - output)
+		// delta  = SigmoidDeriv(output) * (class - output)
+		delta      = TanHDeriv(output) * (class - output)
 		inputDelta = input.Copy()
 	)
 
@@ -62,8 +62,8 @@ func (nr *Neuron) backPropagate(input vector.Vector, class float64) {
 
 // feedForward ...
 func (nr *Neuron) feedForward(input vector.Vector) float64 {
-	return Sigmoid(nr.weights.Dot(input) + nr.bias)
-	// return ReLU(nr.weights.Dot(input) + nr.bias)
+	// return Sigmoid(nr.weights.Dot(input) + nr.bias)
+	return TanH(nr.weights.Dot(input) + nr.bias)
 }
 
 // Output ...
@@ -78,7 +78,7 @@ func (nr *Neuron) train(inputs []vector.Vector, classes []float64, accuracy floa
 		panic("dimension mismatch")
 	}
 
-	for maxIters := 1 << 20; nr.verify(inputs, classes) < accuracy; maxIters-- {
+	for maxIters := 1 << 20; nr.verify(inputs, classes) < accuracy && 0 < maxIters; maxIters-- {
 		for i := 0; i < n; i++ {
 			nr.backPropagate(inputs[i], classes[i])
 		}
@@ -93,7 +93,7 @@ func (nr *Neuron) verify(inputs []vector.Vector, classes []float64) float64 {
 
 	var correct float64
 	for i := 0; i < n; i++ {
-		if math.Approx(nr.feedForward(inputs[i]), classes[i], 0.00000125) {
+		if math.Approx(nr.feedForward(inputs[i]), classes[i], 0.1) {
 			correct++
 		}
 	}

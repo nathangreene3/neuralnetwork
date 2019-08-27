@@ -12,17 +12,17 @@ type Perceptron struct {
 	dimensions int
 	weights    vector.Vector
 	bias       float64
-	decider    Decider
+	activator    Activator
 }
 
 // NewPerceptron initiates an untrained perceptron of a specified number of dimensions.
-func NewPerceptron(dimensions int, decider Decider) *Perceptron {
+func NewPerceptron(dimensions int, activator Activator) *Perceptron {
 	// Initially, -1 < weights, bias < 1
 	return &Perceptron{
 		dimensions: dimensions,
 		weights:    vector.New(dimensions, func(i int) float64 { return 1 - 2*rand.Float64() }),
 		bias:       1 - 2*rand.Float64(),
-		decider:    decider,
+		activator:    activator,
 	}
 }
 
@@ -31,7 +31,7 @@ func (p *Perceptron) backPropagate(input vector.Vector, delta float64) {
 	// delta = rate * f'(weights*input+bias) * (class-f(weights*input+bias))
 	// delta is subtracted in Data Science from Scratch (output - class). Here, it is added (class - output).
 	// delta is an argument here because:
-	// * the decider's derivative may not be defined (Lookin' at you, Threshold)
+	// * the activator's derivative may not be defined (Lookin' at you, Threshold)
 	// * the learning rate may not be given or necessary
 	deltaInput := input.Copy()
 	deltaInput.Multiply(delta)
@@ -40,19 +40,19 @@ func (p *Perceptron) backPropagate(input vector.Vector, delta float64) {
 }
 
 // DefinePerceptron ...
-func DefinePerceptron(weights vector.Vector, bias float64, decider Decider) *Perceptron {
+func DefinePerceptron(weights vector.Vector, bias float64, activator Activator) *Perceptron {
 	return &Perceptron{
 		dimensions: len(weights),
 		weights:    weights.Copy(),
 		bias:       bias,
-		decider:    decider,
+		activator:    activator,
 	}
 }
 
 // feedForward computes the perceptron decision (result) given an input
 // value. A decision function must return a value on the range [0,1].
 func (p *Perceptron) feedForward(input vector.Vector) float64 {
-	return p.decider(p.weights.Dot(input) + p.bias)
+	return p.activator(p.weights.Dot(input) + p.bias)
 }
 
 // Output ...

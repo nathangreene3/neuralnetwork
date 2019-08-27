@@ -94,4 +94,3 @@ func TestPerceptronOnLogicGates(t *testing.T) {
 	// 	t.Fatalf("Class XOR result: %0.2f%%", correct)
 	// }
 }
-
