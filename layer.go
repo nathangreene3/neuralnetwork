@@ -20,21 +20,8 @@ func newLayer(dimensions, size int) *Layer {
 	return lr
 }
 
-// append a neuron.
-func (lr *Layer) append(nr *Neuron) {
-	lr.neurons = append(lr.neurons, nr)
-	lr.size++
-}
-
-// backPropagate ...
-func (lr *Layer) backPropagate(input vector.Vector, class []float64) {
-	for i := 0; i < lr.size; i++ {
-		lr.neurons[i].backPropagate(input, class[i])
-	}
-}
-
-// defineLayer ...
-func defineLayer(neurons ...*Neuron) *Layer {
+// makeLayer given some pre-defined neurons.
+func makeLayer(neurons ...*Neuron) *Layer {
 	lr := &Layer{neurons: make([]*Neuron, 0, len(neurons))}
 	for _, nr := range neurons {
 		lr.append(nr)
@@ -43,7 +30,24 @@ func defineLayer(neurons ...*Neuron) *Layer {
 	return lr
 }
 
-// feedForward ...
+// append a neuron.
+func (lr *Layer) append(nr *Neuron) {
+	lr.neurons = append(lr.neurons, nr)
+	lr.size++
+}
+
+// backPropagate ...
+func (lr *Layer) backPropagate(input vector.Vector, class vector.Vector) {
+	if lr.size != len(class) {
+		panic("dimension mismatch")
+	}
+
+	for i := 0; i < lr.size; i++ {
+		lr.neurons[i].backPropagate(input, class[i])
+	}
+}
+
+// feedForward returns the result of the layer given some input.
 func (lr *Layer) feedForward(input vector.Vector) vector.Vector {
 	output := vector.Zero(lr.size)
 	for i, nr := range lr.neurons {
@@ -53,7 +57,7 @@ func (lr *Layer) feedForward(input vector.Vector) vector.Vector {
 	return output
 }
 
-// Output ...
+// Output returns the result of the layer given some input.
 func (lr *Layer) Output(input vector.Vector) vector.Vector {
 	return lr.feedForward(input)
 }

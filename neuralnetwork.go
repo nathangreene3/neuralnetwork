@@ -17,11 +17,22 @@ type NeuralNetwork struct {
 }
 
 // New neural network.
-func New(dimensions int, layerSizes ...int) *NeuralNetwork {
+func New(layerSizes ...int) *NeuralNetwork {
 	n := len(layerSizes)
 	nn := &NeuralNetwork{layers: make([]*Layer, 0, n)}
-	for i := 0; i < n; i++ {
-		nn.append(newLayer(dimensions, layerSizes[i]))
+	nn.append(newLayer(layerSizes[0], layerSizes[0]))
+	for i := 1; i < n; i++ {
+		nn.append(newLayer(layerSizes[i-1], layerSizes[i]))
+	}
+
+	return nn
+}
+
+// makeNeuralNetwork ...
+func makeNeuralNetwork(layers ...*Layer) *NeuralNetwork {
+	nn := &NeuralNetwork{layers: make([]*Layer, 0, len(layers))}
+	for _, lr := range layers {
+		nn.append(lr)
 	}
 
 	return nn
@@ -33,21 +44,16 @@ func (nn *NeuralNetwork) append(lr *Layer) {
 	nn.size++
 }
 
+// backPropagate ...
 func (nn *NeuralNetwork) backPropagate(input vector.Vector, class vector.Vector) {
+	if nn.layers[nn.size-1].size != len(class) {
+		panic("dimension mismatch")
+	}
+
 	outputs := nn.feedForward(input)
 	for i := nn.size - 1; 0 <= i; i-- {
 		nn.layers[i].backPropagate(outputs[i], class)
 	}
-}
-
-// defineNeuralNetwork ...
-func defineNeuralNetwork(layers ...*Layer) *NeuralNetwork {
-	nn := &NeuralNetwork{layers: make([]*Layer, 0, len(layers))}
-	for _, lr := range layers {
-		nn.append(lr)
-	}
-
-	return nn
 }
 
 // feedForward ...
@@ -67,20 +73,20 @@ func (nn *NeuralNetwork) Output(input vector.Vector) vector.Vector {
 }
 
 // Train ...TODO
-func (nn *NeuralNetwork) Train(inputs []vector.Vector, class [][]float64, accuracy float64) {
+func (nn *NeuralNetwork) Train(inputs []vector.Vector, classes []vector.Vector, accuracy float64) {
 	n := len(inputs)
-	if n != len(class) {
+	if n != len(classes) {
 		panic("dimension mismatch")
 	}
 
-	for maxIters := 1 << 10; nn.Verify(inputs, class) < accuracy && 0 < maxIters; maxIters-- {
+	for maxIters := 1 << 20; nn.Verify(inputs, classes) < accuracy && 0 < maxIters; maxIters-- {
 		for i := 0; i < n; i++ {
-			nn.backPropagate(inputs[i], class[i])
+			nn.backPropagate(inputs[i], classes[i])
 		}
 	}
 }
 
 // Verify ...TODO
-func (nn *NeuralNetwork) Verify(inputs []vector.Vector, class [][]float64) float64 {
+func (nn *NeuralNetwork) Verify(inputs []vector.Vector, class []vector.Vector) float64 {
 	return 0
 }

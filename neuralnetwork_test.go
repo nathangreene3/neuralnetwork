@@ -32,19 +32,19 @@ func TestNeuronOnLogicGates(t *testing.T) {
 		classXOR[i] = xor(x, y)
 	}
 
-	nr.train(data, classAND, 0.95)
+	nr.Train(data, classAND, 0.95)
 	correct := 100 * nr.verify(data, classAND)
 	if correct < 100 {
 		t.Fatalf("Class AND result: %0.2f%%", correct)
 	}
 
-	nr.train(data, classNAND, 0.95)
+	nr.Train(data, classNAND, 0.95)
 	correct = 100 * nr.verify(data, classNAND)
 	if correct < 100 {
 		t.Fatalf("Class NAND result: %0.2f%%", correct)
 	}
 
-	nr.train(data, classOR, 0.95)
+	nr.Train(data, classOR, 0.95)
 	correct = 100 * nr.verify(data, classOR)
 	if correct < 100 {
 		t.Fatalf("Class OR result: %0.2f%%", correct)
@@ -67,12 +67,12 @@ func TestDefineNeuralNetwork(t *testing.T) {
 			vector.Vector{1, 0}, // class: 1
 			vector.Vector{1, 1}, // class: 0
 		}
-		nnXOR = defineNeuralNetwork(
-			defineLayer(
+		nnXOR = makeNeuralNetwork(
+			makeLayer(
 				makeNeuron(vector.Vector{20, 20}, -30),
 				makeNeuron(vector.Vector{20, 20}, -10),
 			),
-			defineLayer(
+			makeLayer(
 				makeNeuron(vector.Vector{-60, 60}, -30),
 			),
 		)
@@ -92,7 +92,6 @@ func TestDefineNeuralNetwork(t *testing.T) {
 	}
 }
 
-/*
 func TestTrainNeuralNetwork(t *testing.T) {
 	var (
 		data = matrix.Matrix{
@@ -102,22 +101,25 @@ func TestTrainNeuralNetwork(t *testing.T) {
 			vector.Vector{1, 1},
 		}
 		n        = len(data)
-		classAND = vector.Zero(n)
+		classAND = make([]vector.Vector, 0, n)
 		// classNAND = vector.Zero(n)
 		// classOR   = vector.Zero(n)
 		// classXOR  = vector.Zero(n)
-		nn   = New(2, 2, 1)
+		nn   = New(2, 1)
 		x, y float64
 	)
 
-	for i, v := range data {
+	for _, v := range data {
 		x, y = v[0], v[1]
-		classAND[i] = and(x, y)
+		classAND = append(classAND, vector.Vector{and(x, y)})
 		// classNAND[i] = nand(x, y)
 		// classOR[i] = or(x, y)
 		// classXOR[i] = xor(x, y)
 	}
 
-	// nn.Train(data, classAND, 0)
+	nn.Train(data, classAND, 0.95)
+	correct := 100 * nn.Verify(data, classAND)
+	if correct < 100 {
+		t.Fatalf("Class AND result: %0.2f%%", correct)
+	}
 }
-*/

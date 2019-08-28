@@ -71,8 +71,8 @@ func (nr *Neuron) Output(input vector.Vector) float64 {
 	return nr.feedForward(input)
 }
 
-// train ...
-func (nr *Neuron) train(inputs []vector.Vector, classes []float64, accuracy float64) {
+// Train ...
+func (nr *Neuron) Train(inputs []vector.Vector, classes []float64, accuracy float64) {
 	n := len(inputs)
 	if n != len(classes) {
 		panic("dimension mismatch")
